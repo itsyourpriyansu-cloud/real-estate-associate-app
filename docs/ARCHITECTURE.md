@@ -1,0 +1,144 @@
+# Architecture
+
+Source of truth for product scope, design and data is `REAL_ESTATE_ASSOCIATE_PHASE1_CLAUDE_MASTER.md`. This document records how Stage 1 realised it, every decision that departed from or extended it, and how a real backend replaces the mocks.
+
+## 1. Layering
+
+```text
+Screens / routes            app/**
+        ↓  (imports feature hooks only)
+Feature hooks / view-models src/features/**, src/hooks/**
+        ↓  (imports @/repositories only)
+Repository contracts        src/repositories/contracts/*      pure interfaces + RepositoryError
+        ↓
+Composition root            src/repositories/index.ts         picks the implementation
+        ↓
+Mock repositories           src/repositories/mock/*           MockContext = the fake "transport"
+        ↓
+MockDatabase                in-memory tables, persisted via the storage abstraction
+        ↓
+Seed builders               src/seed/*                        pure, deterministic, clock-anchored
+```
+
+**The critical rule — no screen imports seed data — is enforced three ways:** an ESLint `no-restricted-imports` rule (catches `@/seed`, relative `…/seed/…`, and `@/repositories/mock`), `__tests__/architecture.test.ts` (scans files independently of ESLint), and the fact that `src/seed/index.ts` is documented as mock-layer-only. A deliberately bad file was used to confirm the lint rule fires.
+
+Dependency direction is one-way: `contracts` import only `@/domain` (tested); `domain` imports nothing but Zod; `design-system` imports only a _type_ from `domain`.
+
+## 2. Repository pattern
+
+Eight contracts in `src/repositories/contracts`, each documented with the HTTP route it maps to (spec §28): `LeadRepository`, `ProjectRepository`, `PlotRepository`, `TaskRepository`, `VisitRepository`, `ConversationRepository`, `NotificationRepository`, `UserRepository`. They throw a single error type, `RepositoryError` with codes `OFFLINE | SERVER_ERROR | NOT_FOUND | INVALID_INPUT`, so screens render recoverable states without knowing the transport.
+
+**Mock implementation.** Each `Mock*Repository` is thin: query/mutation logic only. `MockContext` owns everything transport-like:
+
+- applies the active simulation (latency → offline → server error) before every call;
+- hydrates the `MockDatabase` lazily;
+- returns a deep copy, so callers can never mutate the database through a returned object (tested);
+- commits mutations to storage.
+
+`effects.ts` holds cross-entity side effects a real backend would perform server-side: completing a task refreshes the lead's next action; completing a visit closes its paired task and logs `VISIT_COMPLETED`; sending a message logs `WHATSAPP_SENT`; shortlisting logs `PLOT_SHORTLISTED`.
+
+`MockDatabase` fingerprints its dataset as `seedVersion : scenario : calendar-day`. On every access it compares the fingerprint to the current scenario/clock. A mismatch — the user changed scenario or clock mode, the seed version was bumped, or the day rolled over in real-clock mode — rebuilds from the seed. Persisted data that fails to parse or fails Zod validation also falls back to a fresh seed. Consequence: **no manual "reload" plumbing anywhere**.
+
+### Replacing the mocks with FastAPI
+
+1. Implement each contract: `ApiLeadRepository implements LeadRepository`, etc., using a shared HTTP client. Map `RepositoryError` codes from status codes (0/network → `OFFLINE`, 5xx → `SERVER_ERROR`, 404 → `NOT_FOUND`, 4xx → `INVALID_INPUT`).
+2. In `src/repositories/index.ts`, build a `Repositories` object from them instead of `createMockRepositories(...)`.
+3. Delete nothing else. `resetPrototypeData` is prototype-only and is not part of any contract.
+
+Server-side behaviours the mocks emulate (derived `OVERDUE` task status, live `availableUnits`, next-action refresh) must be provided by the API or reproduced in the API repository. They are listed in the contract comments.
+
+## 3. Services, stores, hooks
+
+| Piece              | Responsibility                                                                                                                                | Notes                                                                                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clock`            | The only source of "now". `DEMO` (frozen 21 Sep 2026 09:15 + optional offset) or `REAL`.                                                      | Demo anchor is built from **local** calendar parts, so it reads 09:15 in any timezone.                                                       |
+| `storage`          | `KeyValueStorage` interface, `asyncStorageAdapter`, `MemoryStorage`, `readJson`/`writeJson`.                                                  | Only file that imports AsyncStorage. Matches Zustand's `StateStorage`. Corrupt JSON reads as absent.                                         |
+| `simulation`       | `SimulationController` — framework-agnostic holder of scenario + latency; deterministic latency sequence (250–700 ms).                        | The data layer reads this; it never sees React or Zustand.                                                                                   |
+| `haptics`          | Semantic haptic helpers honouring the user preference; never throws.                                                                          | Stage 2 components call this, not `expo-haptics`.                                                                                            |
+| `auth`             | `AuthService` interface + `prototypeAuth` (10-digit phone, fixed OTP). Maps to `/api/v1/auth/*`.                                              | Not a repository. Deliberately bypasses the simulation gate so an Offline scenario can never lock the tester out of login.                   |
+| `authStore`        | Session only: `status`, `phone`, transient `pendingPhone`. Persisted.                                                                         | Resolves the user lazily via `UserRepository.getCurrent()`; stores no user record.                                                           |
+| `preferencesStore` | Notifications, haptics, Reduce Motion override (`system`/`on`/`off`). Persisted.                                                              | No appearance setting — dark-only in Phase 1.                                                                                                |
+| `prototypeStore`   | Scenario, latency, clock mode, `datasetRevision`. Mirrors values into `simulation`/`clock`. Persisted.                                        | `datasetRevision` increments when the dataset changes; it is a refetch signal, not data. A test asserts the store holds no application data. |
+| `hydration`        | `useStoresHydrated()` — root layout holds the splash until all three persisted stores rehydrate.                                              | Prevents a signed-out flash and prevents repositories running against default scenario/clock.                                                |
+| `useAsyncResource` | The one pattern feature hooks use: `loader → {status, data, error, reload}`. Ignores stale/unmounted results; refetches on `datasetRevision`. | Deliberately tiny. No query cache in Phase 1 (spec §3).                                                                                      |
+
+## 4. Routing and shell
+
+Expo Router with a **root `app/` directory** (the SDK 57 template uses `src/app/`; the spec's tree wins). Typed routes are on, so every `href` is checked against the route tree at typecheck.
+
+`app/_layout.tsx` loads fonts and hydrates stores under the splash screen, then renders a root `Stack` with two `Stack.Protected` groups: `(auth)` when signed out, everything else when signed in. Signing in/out flips the guard and Expo Router falls back to `index`, which redirects. The five tabs are exactly `home · leads · projects · tasks · inbox` (tested). Header actions (search, notifications, profile) arrive in Stage 3 and are not tabs.
+
+## 5. Determinism and the demo clock
+
+Seed builders are **pure functions of `(anchor, scenario)`**. Every timestamp is `(dayOffset, "HH:mm")` relative to the anchor. In demo mode the anchor is 21 Sep 2026, so the data is byte-identical on every launch (tested). In real-clock mode the anchor is today, so "10:30 follow-up today" stays today.
+
+Derived lead fields (`createdAt`, `updatedAt`, `lastActivityAt`, next action, `notesCount`, `unreadMessages`) are **computed from the timeline, tasks and conversations** in `finalizeLeads`, never authored — a lead cannot disagree with its own history. Project unit counts are derived from plots. Demo-critical plots are pinned by id in `seed/plots.ts` (`DEMO_PLOT_IDS`) so each lead's shortlist/booking fits their budget, size, facing and location (tested for every lead).
+
+## 6. Spec review: contradictions, gaps and how they were resolved
+
+Resolved with documented defaults rather than questions, per spec §24.
+
+| #   | Spec issue                                                                                                                                                  | Resolution                                                                                                                                                                                                   |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | `Task.status` includes `OVERDUE`, which depends on the clock; a stored value would go stale when the demo is opened weeks later.                            | Seed stores only `OPEN`/`DONE`. Repositories derive `OVERDUE` at read time (`deriveTaskStatus`).                                                                                                             |
+| 2   | Spec §12 requires a "lost lead reason" and §16 a "monthly booking value", but `Lead` has no field for either.                                               | Added optional `Lead.lostReason` and `Lead.bookedPlotId`.                                                                                                                                                    |
+| 3   | Spec §14.9 "Shortlist for Lead" has nowhere to store a shortlist unless a visit exists (`shortlistedPlotIds` is only on `SiteVisit`).                       | Added `Lead.shortlistedPlotIds: string[]`.                                                                                                                                                                   |
+| 4   | Type scale specifies weights 450 and 650. React Native cannot render fractional weights of bundled fonts.                                                   | Snapped to shipped Inter weights: 450 → Regular 400, 650 → SemiBold 600. Sizes/line-heights are exact.                                                                                                       |
+| 5   | "Demo clock" only helps if seed timestamps move with it; a fixed-date seed is stale under the real clock.                                                   | Seed is a builder anchored to the active clock. Real-clock mode re-anchors to today.                                                                                                                         |
+| 6   | §20 lists "Normal, Busy day, Empty CRM, Offline, Repository errors" as one selector, but the first three change _data_ and the last two change _transport_. | One selector maps onto `{dataset, network}` (`SCENARIO_PROFILES`). Offline/Errors use the Normal dataset.                                                                                                    |
+| 7   | Spec §6 puts `app/` at the repo root; the SDK 57 template uses `src/app/`.                                                                                  | Kept the spec's root `app/`.                                                                                                                                                                                 |
+| 8   | Spec §14.12 defines a conversation detail screen but §6's route tree has no route for it.                                                                   | Added `app/conversations/[conversationId].tsx`.                                                                                                                                                              |
+| 9   | Spec §20 requires a "hidden or developer-accessible Prototype Controls screen" but §6 has no route for it.                                                  | Added `app/prototype-controls.tsx` (placeholder; UI in Stage 8). State already lives in `prototypeStore`.                                                                                                    |
+| 10  | Spec §1 lists "Cost Sheet Preview", "Booking Intent" and §14.5 "Property matches", but §11 defines no schema for them.                                      | No new stored entities. Cost preview derives from `Plot.estimatedTotal`; booking intent is `Lead.stage = BOOKING` + a follow-up task; property matching is a pure function planned for Stage 5 in `domain/`. |
+| 11  | Spec §12 example copy says "137 plots available" but the seed requirement is 120 plots.                                                                     | Copy example only; seed has 120 plots (74 available). No conflict.                                                                                                                                           |
+| 12  | `WhatsAppService` (§14.13) and `services/whatsapp.ts` are listed but WhatsApp is Stage 6.                                                                   | Not built in Stage 1. Interface is specified in the spec; Stage 6 implements it.                                                                                                                             |
+| 14  | Stage 2 brief supersedes spec §9 tokens: new palette/type/radius/spacing names and values; Bold removed.                                                    | Replaced in place — one system, no aliases. See DESIGN_SYSTEM.md.                                                                                                                                            |
+| 15  | Brief suggests `design-system/{tokens,primitives,components,patterns}`; spec §6 fixes tokens at `src/design-system/*.ts` and UI at `src/components/*`.      | Mapped layers onto the existing structure instead of creating two homes.                                                                                                                                     |
+| 16  | Web-only DOM warnings and a real nested-button defect surfaced when rendering in a browser.                                                                 | `PressableCard`/`CardPressRegion`; `aria-hidden` on icons.                                                                                                                                                   |
+| 13  | Spec §3 calls for "Expo-managed RN 0.86.x".                                                                                                                 | Verified: SDK 57.0.24 ships React Native 0.86.3. Not a contradiction.                                                                                                                                        |
+
+## 7. Dependencies and why
+
+**Runtime**
+
+| Package                                                         | Why                                                                                                                                              | Consumed?                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `expo` `~57.0.24`, `react` 19.2.3, `react-native` 0.86.3        | Platform baseline (SDK 57 pins these).                                                                                                           | Yes                                                |
+| `expo-router`                                                   | File-based routing, typed routes, guarded groups, future deep links.                                                                             | Yes                                                |
+| `expo-constants`, `expo-linking`                                | Required peers of `expo-router`.                                                                                                                 | Yes (via router)                                   |
+| `react-native-screens`, `react-native-safe-area-context`        | Required by Expo Router / safe-area layouts.                                                                                                     | Yes                                                |
+| `react-native-gesture-handler`                                  | Required by Expo Router; `GestureHandlerRootView` at the root; sheets/swipes later.                                                              | Yes                                                |
+| `react-native-reanimated` 4.5.1, `react-native-worklets` 0.10.1 | Purposeful motion (spec §9.7). Worklets is Reanimated 4's required peer.                                                                         | Yes (Stage 2) — press, sheet, toast, tab indicator |
+| `expo-font`, `@expo-google-fonts/inter`                         | Inter (spec §9.3). Imported per-weight to ship 4 files, not 18.                                                                                  | Yes                                                |
+| `expo-asset`                                                    | Required peer of `expo-font`; must be explicit (removing the template's demo packages had been pulling it in transitively — a test caught this). | Yes (via font loading)                             |
+| `expo-splash-screen`, `expo-status-bar`, `expo-system-ui`       | Hold splash until fonts+stores are ready; light status bar; dark root background / `userInterfaceStyle`.                                         | Yes                                                |
+| `zustand`                                                       | Session / preferences / prototype-controls state (spec §3).                                                                                      | Yes                                                |
+| `zod`                                                           | Domain schemas + validation of fixtures and persisted data.                                                                                      | Yes                                                |
+| `date-fns`                                                      | Deterministic date arithmetic/formatting for the clock and seed.                                                                                 | Yes                                                |
+| `@react-native-async-storage/async-storage` 2.2.0               | Persistence, behind `services/storage`. Version is the one Expo pins for SDK 57.                                                                 | Yes                                                |
+| `lucide-react-native`, `react-native-svg`                       | Icon set (spec §3); `react-native-svg` is its required peer.                                                                                     | Yes (tab icons)                                    |
+| `expo-haptics`                                                  | Tactile feedback via `services/haptics`.                                                                                                         | Yes (wrapper, tested)                              |
+| `expo-image`                                                    | Cached project imagery (spec §21). Declared per the required stack.                                                                              | Yes (Stage 2) — `Avatar`, `ProjectImage`           |
+| `react-hook-form`, `@hookform/resolvers`                        | Login/OTP/filter/edit forms (spec §3). Declared per the required stack.                                                                          | Yes (Stage 2) — `PhoneLoginForm`                   |
+| `react-dom` 19.2.3 (exact)                                      | npm otherwise auto-installs an optional peer at 19.3.0, which conflicts with `react@19.2.3`. Pinned to match React; not used for a web target.   | Peer resolution only                               |
+
+**Dev:** `typescript ~6.0.3`, `@types/react`, `@types/jest`, `@types/node`, `jest` + `jest-expo`, `@testing-library/react-native` 14 + its peer `test-renderer`, `eslint` + `eslint-config-expo` + `eslint-config-prettier`, `prettier`, and (Stage 2) `react-native-web` for browser-based visual QA.
+
+All runtime dependencies are now consumed (Stage 2 first used Reanimated, worklets, `expo-image`, React Hook Form and its resolver). **Stage 2 added one dev dependency:** `react-native-web`, used only so the UI can be rendered in a browser for visual QA (`npm run web`); it is not part of the native app.
+
+### Toolchain notes (each cost time; recorded so they do not again)
+
+- **TypeScript 6 defaults `types` to `[]`.** `@types/jest` / `@types/node` are no longer auto-included; `tsconfig.json` sets `"types": ["jest", "node"]`.
+- **Font barrel imports bundle all weights.** `import … from '@expo-google-fonts/inter'` pulled 18 TTFs (~6 MB). Fixed by subpath imports (`@expo-google-fonts/inter/400Regular`).
+- **`expo export` does not generate typed routes; `expo start` does.** Run the dev server once before relying on typed-route errors in `tsc`.
+- **`react-native` cannot be `require`d from plain Node** (Flow syntax); use Jest or Metro.
+- **RNTL 14 is async** (`await render`, `await renderHook`, `await fireEvent`).
+- **React Compiler is disabled** (the SDK 57 template enables it). Re-enable only after auditing Reanimated shared-value usage.
+
+## 8. Agent working model
+
+The spec asks for eight agent roles, using sub-agents where available. Stage 1 was executed **sequentially by one engineer playing each role in the spec's order** (Architect → Design System → Domain/Seed → Navigation → QA), because its pieces are tightly coupled — schemas, seed relationships and repository contracts had to be designed against each other, and independent agents starting cold would each have re-derived that context and risked competing definitions. Roles, ownership and next-stage briefs are in [AGENT_HANDOFF.md](AGENT_HANDOFF.md). Parallel sub-agents become worthwhile from Stage 4 onward, when CRM and Property features are genuinely independent behind the shared contracts and primitives.
+
+## 9. Testing strategy
+
+338 tests in 9 suites: seed integrity (all three dataset scenarios), repository behaviour and side effects, persistence/reset/corruption, simulation modes, services, design tokens (including WCAG contrast), formatters and Home selectors, 62 component tests (states, accessible names, no nested interactives), five composition tests against the real repositories (data, empty, error, offline, retry, real task completion), store behaviour, and architecture rules (layering, no literal tokens, dev-only gallery). See [QA_CHECKLIST.md](QA_CHECKLIST.md).

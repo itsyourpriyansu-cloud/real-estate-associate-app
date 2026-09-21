@@ -1,0 +1,8 @@
+node_modules
+.expo
+dist
+package-lock.json
+coverage
+docs/REAL_ESTATE_ASSOCIATE_PHASE1_CLAUDE_MASTER.md
+expo-env.d.ts
+.claude

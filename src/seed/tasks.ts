@@ -1,0 +1,198 @@
+import type { Task } from '@/domain';
+
+import { PROJECT_ID, leadId, taskId } from './ids';
+import type { SeedTime } from './time';
+
+/**
+ * Seeded tasks. Only OPEN and DONE are stored; OVERDUE is derived by the repository from the clock.
+ * Day offsets are relative to "today"; demo "now" is 09:15.
+ */
+export function buildTasks(t: SeedTime): Task[] {
+  return [
+    // --- Today ---
+    {
+      id: taskId(1),
+      type: 'FOLLOW_UP',
+      title: 'Follow up on Real Rise shortlist',
+      leadId: leadId(1),
+      projectId: PROJECT_ID.rr,
+      scheduledAt: t.at(0, '10:30'),
+      status: 'OPEN',
+      priority: 'HIGH',
+      notes: 'Confirm the family visit time and ask about loan pre-approval.',
+    },
+    {
+      id: taskId(2),
+      type: 'WHATSAPP',
+      title: 'Send intro and project options',
+      leadId: leadId(2),
+      scheduledAt: t.at(0, '09:30'),
+      status: 'OPEN',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(3),
+      type: 'SITE_VISIT',
+      title: 'Site visit · Cedar Enclave',
+      leadId: leadId(16),
+      projectId: PROJECT_ID.ce,
+      scheduledAt: t.at(0, '12:00'),
+      status: 'OPEN',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(4),
+      type: 'SITE_VISIT',
+      title: 'Site visit · Real Rise',
+      leadId: leadId(1),
+      projectId: PROJECT_ID.rr,
+      scheduledAt: t.at(0, '15:30'),
+      status: 'OPEN',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(5),
+      type: 'CALL',
+      title: 'Discuss Aurelia Greens investment plots',
+      leadId: leadId(11),
+      projectId: PROJECT_ID.ag,
+      scheduledAt: t.at(0, '17:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+      notes: 'He asked for a call after 5 PM.',
+    },
+    {
+      id: taskId(18),
+      type: 'CALL',
+      title: 'First call — capture requirement',
+      leadId: leadId(13),
+      scheduledAt: t.at(0, '11:30'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+
+    // --- Overdue (open, scheduled before demo "now") ---
+    {
+      id: taskId(6),
+      type: 'CALL',
+      title: 'Call back on payment plan',
+      leadId: leadId(3),
+      projectId: PROJECT_ID.ag,
+      scheduledAt: t.at(-1, '18:00'),
+      status: 'OPEN',
+      priority: 'HIGH',
+      notes: 'He asked for a three-instalment schedule.',
+    },
+    {
+      id: taskId(7),
+      type: 'FOLLOW_UP',
+      title: 'Follow up after brochure',
+      leadId: leadId(18),
+      scheduledAt: t.at(-3, '11:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+    {
+      id: taskId(8),
+      type: 'WHATSAPP',
+      title: 'Share Northgate County brochure',
+      leadId: leadId(4),
+      projectId: PROJECT_ID.nc,
+      scheduledAt: t.at(-1, '16:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+
+    // --- Upcoming ---
+    {
+      id: taskId(9),
+      type: 'SITE_VISIT',
+      title: 'Site visit · Real Rise',
+      leadId: leadId(10),
+      projectId: PROJECT_ID.rr,
+      scheduledAt: t.at(1, '11:00'),
+      status: 'OPEN',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(10),
+      type: 'NOTE',
+      title: 'Prepare cost sheet comparison',
+      leadId: leadId(14),
+      projectId: PROJECT_ID.ag,
+      scheduledAt: t.at(1, '14:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+    {
+      id: taskId(17),
+      type: 'CALL',
+      title: 'Share Cedar Enclave investment numbers',
+      leadId: leadId(5),
+      projectId: PROJECT_ID.ce,
+      scheduledAt: t.at(1, '15:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+    {
+      id: taskId(12),
+      type: 'CALL',
+      title: 'Confirm booking amount and KYC checklist',
+      leadId: leadId(7),
+      projectId: PROJECT_ID.ce,
+      scheduledAt: t.at(1, '17:30'),
+      status: 'OPEN',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(11),
+      type: 'FOLLOW_UP',
+      title: 'Follow up on shortlist feedback',
+      leadId: leadId(17),
+      scheduledAt: t.at(2, '10:00'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+    {
+      id: taskId(14),
+      type: 'CALL',
+      title: 'Qualify budget and purchase timeline',
+      leadId: leadId(6),
+      scheduledAt: t.at(3, '10:30'),
+      status: 'OPEN',
+      priority: 'NORMAL',
+    },
+    {
+      id: taskId(13),
+      type: 'WHATSAPP',
+      title: 'Send Northgate County price list',
+      leadId: leadId(12),
+      projectId: PROJECT_ID.nc,
+      scheduledAt: t.at(4, '11:00'),
+      status: 'OPEN',
+      priority: 'LOW',
+    },
+
+    // --- Completed ---
+    {
+      id: taskId(15),
+      type: 'CALL',
+      title: 'Discuss budget and preferred facing',
+      leadId: leadId(1),
+      projectId: PROJECT_ID.rr,
+      scheduledAt: t.at(-2, '11:30'),
+      status: 'DONE',
+      priority: 'HIGH',
+    },
+    {
+      id: taskId(16),
+      type: 'SITE_VISIT',
+      title: 'Site visit · Aurelia Greens',
+      leadId: leadId(3),
+      projectId: PROJECT_ID.ag,
+      scheduledAt: t.at(-3, '15:00'),
+      status: 'DONE',
+      priority: 'HIGH',
+    },
+  ];
+}

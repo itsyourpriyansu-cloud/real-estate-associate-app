@@ -9,7 +9,7 @@ Run everything: `npm run validate` (typecheck + lint + tests), then `npm run doc
 - [x] **TypeScript strict** — `npm run typecheck`, typed routes active.
 - [x] **ESLint** — `--max-warnings=0` (includes the React-Compiler rules from `eslint-config-expo`).
 - [x] **Prettier** — `npm run format:check`.
-- [x] **Jest** — 338 tests, 9 suites (architecture 79 · components 62 · design-system 48 · format/selectors · previews 18 · repositories · seed · services · stores).
+- [x] **Jest** — 387 tests, 11 suites (architecture · session guard matrix · flow: team/sales/summary/pricing · components · design-system · format/selectors · previews · repositories · seed · services · stores).
 - [x] **Expo Doctor** — 21/21; `expo install --check` clean.
 - [x] **Production bundles** — Android + iOS (Hermes), `__DEV__` false; only three Inter files ship.
 - [ ] **Android build launches on a device/emulator** — _not verified._
@@ -29,7 +29,7 @@ Run everything: `npm run validate` (typecheck + lint + tests), then `npm run doc
 - [x] Button states: default, pressed, disabled, loading (busy, unpressable, width-stable) — tested.
 - [x] Form states: idle, focused, filled, error (text + icon + alert role), disabled — tested; PhoneField digit filter and OTPField completion — tested.
 - [x] Status system: all five plot statuses render label + icon + tone with a spoken "Status: …" — tested; urgency spelled out ("Overdue · Yesterday · 6:00 PM").
-- [x] Custom bottom navigation: exactly five tabs in order, safe-area aware, selected state and unread count spoken, no re-navigation on the focused tab — tested.
+- [x] `AppTabBar` component (parked with the CRM shell): five tabs in order, safe-area aware, selected state and unread count spoken; component test kept. The app itself has no tab bar (SCREEN_MAP.md).
 - [x] Header system: Standard, LargeTitle, Detail, Search, Home — in the gallery.
 - [x] Design-system gallery at `/dev/design-system`, dev-only (`Stack.Protected guard={__DEV__}` + redirect; test + production bundle).
 - [x] Five representative compositions (Home, Leads, Projects, Tasks, Inbox) over repositories, each tested for data, empty, error and offline behaviour.
@@ -78,3 +78,14 @@ Answered from the rendered screenshots (a designer's eye, not a metric):
 - Inter renders capital "I" and lowercase "l" alike ("Ananya Iyer" ≈ "Ananya lyer").
 - App icon and splash remain the Expo template placeholders.
 - `react-native-web` is a dev dependency used only for visual QA.
+
+## App-flow restructure (route tree, session, contracts)
+
+- [x] **Session guards** — none / guest / client / associate against every route group, plus the landing per session (`session.test.ts`).
+- [x] **Route tree** — every route file exists, the CRM route files are gone, every top-level route is registered in the root layout (`architecture.test.ts`).
+- [x] **Wrong-role login** — an associate number on Simple Login and a client number on Associate Login show an inline error and set no pending phone (`stores.test.tsx`, `services.test.ts`, browser walk).
+- [x] **Persisted session migration** — a v1 `{status, phone}` session becomes an associate session; signed-out stays signed out (`stores.test.tsx`).
+- [x] **Team / Sales / Summary** — downline levels, add member (default sponsor, deeper sponsor, duplicate, outside sponsor), booking side effects, pending states, offline (`flow.test.ts`).
+- [x] **Browser walk (Chrome 390x844, `expo start --web`)** — Home to Guest / Associate / Simple login; OTP; Dashboard to all 7 sections plus Profile and Settings and back; sign out; client deep link `/dashboard` lands on the guest hub; a guest session survives a reload; **0 console errors**.
+- [x] **Production bundle** — `expo export --platform android` succeeds with the new tree.
+- [ ] **Not verified:** a device/emulator run, Expo Doctor after the restructure, an iOS bundle.

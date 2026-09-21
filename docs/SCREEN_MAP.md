@@ -64,17 +64,17 @@ Route-group parentheses add no URL segment. The dashboard's numbering (1–7) is
 
 Their **route files were removed from `app/`**; the feature code, components, repositories, domain and seed are untouched, so re-attaching is "add a route file that renders the existing screen".
 
-| Was                      | Code that remains                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| `(tabs)/home`            | `features/home/*` (`HomePreview`, `useHomeData`, `buildHomeData`)                           |
-| `(tabs)/leads`           | `features/leads/*`, `LeadRepository`                                                        |
-| `(tabs)/tasks`           | `features/tasks/*`, `TaskRepository`                                                        |
-| `(tabs)/inbox`           | `features/inbox/*`, `ConversationRepository`                                                |
-| `(tabs)/_layout`         | `components/navigation/AppTabBar`                                                           |
-| `leads/[leadId]`         | placeholder only                                                                            |
-| `conversations/[id]`     | placeholder only                                                                            |
-| `notifications`, `search`| placeholders; `NotificationRepository`                                                      |
-| `(auth)/onboarding`      | placeholder only                                                                            |
+| Was                       | Code that remains                                                 |
+| ------------------------- | ----------------------------------------------------------------- |
+| `(tabs)/home`             | `features/home/*` (`HomePreview`, `useHomeData`, `buildHomeData`) |
+| `(tabs)/leads`            | `features/leads/*`, `LeadRepository`                              |
+| `(tabs)/tasks`            | `features/tasks/*`, `TaskRepository`                              |
+| `(tabs)/inbox`            | `features/inbox/*`, `ConversationRepository`                      |
+| `(tabs)/_layout`          | `components/navigation/AppTabBar`                                 |
+| `leads/[leadId]`          | placeholder only                                                  |
+| `conversations/[id]`      | placeholder only                                                  |
+| `notifications`, `search` | placeholders; `NotificationRepository`                            |
+| `(auth)/onboarding`       | placeholder only                                                  |
 
 ## Navigation model
 
@@ -84,19 +84,19 @@ Their **route files were removed from `app/`**; the feature code, components, re
 
 ## Routes → owner, data, stage
 
-| Route                            | Feature hook reads (contracts)                                              | Primary job                                                        | Stage |
-| -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----- |
-| `/home`                          | `SummaryRepository.getPublicSummary`                                        | Show public numbers; choose Guest / Associate / Simple             | A     |
-| `/associate-login`, `/simple-login`, `/otp` | — (`prototypeAuth`, `authStore`)                                 | Phone → OTP; wrong-role numbers get an inline error                | A     |
-| `/guest-home`                    | —                                                                           | One row: Our Projects; sign out / exit                             | A     |
-| `/projects`, `/projects/:id`, `/projects/:id/inventory`, `/plots/:id` | `ProjectRepository`, `PlotRepository`         | Browse projects, inventory, plot detail                            | B     |
-| `/dashboard`                     | `SummaryRepository.getAssociateSummary`                                     | 2 summary containers (with **pending** state) + 7 section rows     | C     |
-| `/site-visits`, `/site-visits/:id` | `VisitRepository.list({associateIds})`, leads, projects                   | Visit log, details, statuses; team total                           | D     |
-| `/price-calculator`              | `ProjectRepository`, `PlotRepository`, `calculatePlotCost` (domain)         | Cost preview (never a quotation)                                   | D     |
-| `/team`, `/team/:id`, `/team/add`| `TeamRepository`                                                            | Downline list, member detail, add member                           | E     |
-| `/team-sales`                    | `SalesRepository.listTeam`, `getTargets`                                    | Team performance vs targets                                        | E     |
-| `/live-booking`, `/live-booking/:plotId` | `ProjectRepository`, `PlotRepository`, `SalesRepository.createBooking` | Pick plot → confirm booking (**prototype hold + sale record only**) | F     |
-| `/profile`, `/settings`, `/prototype-controls` | `UserRepository.getCurrent`, `preferencesStore`, `prototypeStore` | Account, preferences, reset demo data, sign out                    | C     |
+| Route                                                                 | Feature hook reads (contracts)                                         | Primary job                                                         | Stage |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------- | ----- |
+| `/home`                                                               | `SummaryRepository.getPublicSummary`                                   | Show public numbers; choose Guest / Associate / Simple              | A     |
+| `/associate-login`, `/simple-login`, `/otp`                           | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; wrong-role numbers get an inline error                 | A     |
+| `/guest-home`                                                         | —                                                                      | One row: Our Projects; sign out / exit                              | A     |
+| `/projects`, `/projects/:id`, `/projects/:id/inventory`, `/plots/:id` | `ProjectRepository`, `PlotRepository`                                  | Browse projects, inventory, plot detail                             | B     |
+| `/dashboard`                                                          | `SummaryRepository.getAssociateSummary`                                | 2 summary containers (with **pending** state) + 7 section rows      | C     |
+| `/site-visits`, `/site-visits/:id`                                    | `VisitRepository.list({associateIds})`, leads, projects                | Visit log, details, statuses; team total                            | D     |
+| `/price-calculator`                                                   | `ProjectRepository`, `PlotRepository`, `calculatePlotCost` (domain)    | Cost preview (never a quotation)                                    | D     |
+| `/team`, `/team/:id`, `/team/add`                                     | `TeamRepository`                                                       | Downline list, member detail, add member                            | E     |
+| `/team-sales`                                                         | `SalesRepository.listTeam`, `getTargets`                               | Team performance vs targets                                         | E     |
+| `/live-booking`, `/live-booking/:plotId`                              | `ProjectRepository`, `PlotRepository`, `SalesRepository.createBooking` | Pick plot → confirm booking (**prototype hold + sale record only**) | F     |
+| `/profile`, `/settings`, `/prototype-controls`                        | `UserRepository.getCurrent`, `preferencesStore`, `prototypeStore`      | Account, preferences, reset demo data, sign out                     | C     |
 
 `/profile` is wired end-to-end (screen → `useCurrentUser` → `userRepository` → mock → seed) and covered by a test, including its repository-error state. It is the reference implementation of the pattern.
 

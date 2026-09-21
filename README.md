@@ -93,7 +93,7 @@ Signing out does **not** reset data.
 ## Project layout
 
 ```text
-app/                 Expo Router routes ((auth), (tabs), leads, projects, plots, visits, …)
+app/                 Expo Router routes ((public), (guest), (associate), projects, plots, …); see docs/SCREEN_MAP.md
 src/
   components/        primitives · feedback · navigation · domain   (Stage 2 builds these)
   design-system/     colors · spacing · typography · radius · elevation · motion · theme · fonts
@@ -111,8 +111,8 @@ __tests__/           Jest suites
 
 ## Known limitations
 
-- **Most routes are still placeholders.** Login, OTP and the five tab compositions are real; lead/project/plot/visit/conversation detail, notifications, search, profile and settings are placeholders (on the real design system) until their stages. The tab screens are representative compositions, not the final screens.
-- **Not yet run on a device or emulator.** Stages 1–2 were verified by typecheck, lint, 338 tests, Expo Doctor, production Metro bundles for Android and iOS, and a browser render of every tab and the full gallery — not by launching on hardware. Fonts, haptics, safe areas, keyboard behaviour and gesture feel remain unverified; the first on-device run is the first task of the next stage.
+- **Most routes are still placeholders.** The app was restructured around the "Android APP Flow" wireframe: public Home, then Guest / Associate / Simple login, then Our Projects or the associate dashboard with its seven sections. The route tree, session guards, domain and repository contracts are in place; Home, the dashboard and the seven sections are placeholders until Stages A–F (docs/AGENT_HANDOFF.md). Login and OTP are real; `/projects` renders the Stage 2 preview. The CRM shell (Leads, Tasks, Inbox) is parked: code kept, routes removed.
+- **Not yet run on a device or emulator.** Stages 1–2 and the flow restructure were verified by typecheck, lint, 387 tests, Expo Doctor, production Metro bundles for Android and iOS, and a browser render of every tab and the full gallery — not by launching on hardware. Fonts, haptics, safe areas, keyboard behaviour and gesture feel remain unverified; the first on-device run is the first task of the next stage.
 - **App icon and splash** are the Expo template's placeholder images; brand assets are not part of Phase 1.
 - **Tertiary text contrast** (#72726E from the design brief) is below WCAG AA; it is restricted to non-essential text. See docs/DESIGN_SYSTEM.md.
 - **Call / WhatsApp / Add lead** actions on the previews show an honest "arrives in a later stage" toast.

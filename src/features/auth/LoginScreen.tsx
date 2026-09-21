@@ -8,7 +8,8 @@ import { PROTOTYPE_BADGE_LABEL } from '@/constants/prototype';
 import { space } from '@/design-system';
 import type { LoginAs } from '@/services/auth';
 
-import { PrototypeNotice, Wordmark } from './AuthParts';
+import { Wordmark } from '@/components/primitives/BrandMark';
+import { PrototypeNotice } from './AuthParts';
 import { PhoneLoginForm } from './PhoneLoginForm';
 
 const COPY: Record<LoginAs, { title: string; body: string }> = {

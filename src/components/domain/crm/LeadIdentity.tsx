@@ -45,7 +45,7 @@ export function LeadStageIndicator({ stage }: { stage: LeadStage }) {
               height: 4,
               borderRadius: radius.pill,
               backgroundColor:
-                !lost && index <= position ? colors.whitePrimary : colors.surfaceElevated,
+                !lost && index <= position ? colors.inkPrimary : colors.surfaceElevated,
             }}
           />
         ))}

@@ -3,7 +3,8 @@
  * exist only so a stakeholder can walk the Phase 1 demo. Do not treat them as secure.
  */
 
-export const APP_NAME = 'Associate';
+export const APP_NAME = 'Vara Real Estates';
+export const APP_SHORT_NAME = 'Vara';
 
 /** Deterministic prototype credentials (spec §30). Not secure, not production-ready. */
 export const PROTOTYPE_CREDENTIALS = {

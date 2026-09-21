@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from
 
 import { colors, layout, space } from '@/design-system';
 
+import { useDockClearance } from '../navigation/AssociateDock';
 import { SafeScreen, type SafeEdge } from '../primitives/ScreenContainer';
 
 export interface ScreenLayoutProps {
@@ -41,6 +42,7 @@ export function ScreenLayout({
   gap = layout.sectionGap,
   testID,
 }: ScreenLayoutProps) {
+  const dockClearance = useDockClearance();
   const body = (
     <View style={{ width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap }}>
       {children}
@@ -60,7 +62,7 @@ export function ScreenLayout({
             contentContainerStyle={{
               paddingHorizontal: layout.screenPaddingX,
               paddingTop: space[16],
-              paddingBottom: space[32],
+              paddingBottom: space[32] + dockClearance,
               flexGrow: 1,
             }}
             keyboardShouldPersistTaps="handled"
@@ -88,7 +90,7 @@ export function ScreenLayout({
               paddingHorizontal: layout.screenPaddingX,
               paddingTop: space[8],
               paddingBottom: space[8],
-              backgroundColor: colors.backgroundSecondary,
+              backgroundColor: colors.surfacePrimary,
               borderTopWidth: 1,
               borderTopColor: colors.borderSubtle,
             }}

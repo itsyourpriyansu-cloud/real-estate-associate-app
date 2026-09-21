@@ -10,28 +10,28 @@ import {
 } from '@/design-system';
 
 export interface SurfaceProps extends ViewProps {
-  /** flat: on the page · raised: grouped · elevated: emphasised · overlay: floating only. */
+  /** flat: on the page · tile: quiet, inside a card · raised: card · elevated: emphasised · overlay: floating · inverse: charcoal hero. */
   variant?: keyof typeof elevation;
   rounded?: RadiusToken;
   padding?: SpaceToken;
-  /** Top-edge hairline highlight (raised/elevated/overlay). */
+  /** Top-edge hairline highlight (tiles only by default). */
   highlight?: boolean;
 }
 
 /**
- * The single grouped-surface primitive. Depth = tonal step + hairline border (+ a soft shadow on
- * overlays). Use sparingly: hierarchy should come from spacing and type before boxes.
+ * The single grouped-surface primitive. Depth = white surface + hairline border + a soft, wide
+ * shadow. Use sparingly: hierarchy should come from spacing and type before boxes.
  */
 export function Surface({
   variant = 'raised',
-  rounded = 'md',
+  rounded = 'lg',
   padding,
   highlight,
   style,
   children,
   ...rest
 }: SurfaceProps) {
-  const showHighlight = highlight ?? variant !== 'flat';
+  const showHighlight = highlight ?? variant === 'tile';
   return (
     <View
       {...rest}

@@ -1,10 +1,12 @@
-# Real Estate Associate App — Phase 1 (frontend prototype)
+# Vara Real Estates — Associate App (Phase 1 prototype)
 
-A premium, dark-first mobile app for real-estate associates: **Lead → Follow-up → Property match → WhatsApp → Site visit → Plot selection → Cost preview → Booking intent → Activity history.**
+A light, soft, premium mobile app for Vara's real-estate associates: browse projects and plots, **book plots live**, calculate prices, review site visits, and manage and track a team — all on seeded demo data.
 
-> **This is a prototype.** All data is deterministic local seed data. There is no backend, no real authentication, no real WhatsApp, no payments and no inventory locking. Nothing in the app is live or secure, and no real customer data is used.
+> **This is a prototype.** All data is deterministic local seed data. There is no backend, no real authentication, no real payments and no inventory locking. Nothing in the app is live or secure, and no real customer data is used.
 
-**Status: Stage 2 (design system + UI foundation + app shell) complete.** The architecture (Stage 1) is unchanged; the app now has a full token layer, 103 reusable components, a custom tab bar and headers, a working login/OTP, five representative compositions over the repositories, and a dev-only component gallery at `/dev/design-system`. Feature screens beyond those previews are built in later stages — see [docs/SCREEN_MAP.md](docs/SCREEN_MAP.md), [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
+**Start here → [docs/RUN_THE_PROTOTYPE.md](docs/RUN_THE_PROTOTYPE.md)** (how to run it, sign in, walk the flow and see every state).
+
+**Status:** the whole flow is built and working on seed data: public **Home** → **Guest / Associate / Simple** login → **Our Projects** (project, inventory, plot) or the **Associate Dashboard** with its seven sections (Our Projects, Live Booking, Price Calculator, Site Visits History, Team Sales, Add Team Member, My Team), Profile, Settings and Prototype controls. The design system was rebuilt as a light theme with a green accent, a floating dock, a charcoal hero card and considered micro-interactions — see [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Route map: [docs/SCREEN_MAP.md](docs/SCREEN_MAP.md). Current state and next steps: [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md). The original CRM (Leads, Tasks, Inbox) is parked, not deleted.
 
 ## Stack
 
@@ -42,10 +44,12 @@ npm run format       # Prettier
 
 ## Demo login
 
-|           |                                                          |
-| --------- | -------------------------------------------------------- |
-| **Phone** | `9876543210` (any valid 10-digit Indian mobile advances) |
-| **OTP**   | `123456`                                                 |
+|                     |                |
+| ------------------- | -------------- |
+| **Associate**       | `9876543210`   |
+| **Simple (client)** | `9876500100`   |
+| **Guest**           | no credentials |
+| **OTP**             | `123456`       |
 
 These are fixed **prototype credentials**. They are not secure and not production-ready. Whichever number is entered, the seeded associate _K. V. Raghunath Reddy_ (Senior Associate, YH-APL2-1048, team YHIPL2) is who you are signed in as.
 

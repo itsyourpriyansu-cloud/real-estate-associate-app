@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { colors, layout, motion, radius, space } from '@/design-system';
+import { colors, elevation, layout, motion, radius, space } from '@/design-system';
 
 import { CountBadge } from '../primitives/CountBadge';
 import { Icon } from '../primitives/Icon';
@@ -49,9 +49,18 @@ export function IconButton({
         borderRadius: radius.pill,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: variant === 'filled' ? colors.surfaceElevated : colors.transparent,
+        backgroundColor: variant === 'filled' ? colors.surfacePrimary : colors.transparent,
         borderWidth: variant === 'plain' ? 0 : 1,
         borderColor: variant === 'outline' ? colors.borderMedium : colors.borderSubtle,
+        ...(variant === 'filled'
+          ? {
+              shadowColor: elevation.raised.shadowColor,
+              shadowOpacity: elevation.raised.shadowOpacity,
+              shadowRadius: elevation.raised.shadowRadius,
+              shadowOffset: elevation.raised.shadowOffset,
+              elevation: elevation.raised.elevation,
+            }
+          : null),
       }}
       pressedStyle={variant === 'plain' ? { backgroundColor: colors.surfaceSecondary } : undefined}
     >

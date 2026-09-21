@@ -28,7 +28,7 @@ export interface ButtonProps {
 }
 
 const heights = { large: 52, medium: 44, small: 36 } as const;
-const radii = { large: radius.md, medium: radius.sm, small: radius.sm } as const;
+const radii = { large: radius.pill, medium: radius.pill, small: radius.pill } as const;
 const paddings = { large: space[24], medium: space[20], small: space[12] } as const;
 const labelStyle = {
   large: typography.buttonLG,
@@ -41,13 +41,13 @@ const surfaces: Record<
   { bg: string; border: string; tone: TextTone; spinner: string }
 > = {
   primary: {
-    bg: colors.whitePrimary,
-    border: colors.whitePrimary,
+    bg: colors.inkPrimary,
+    border: colors.inkPrimary,
     tone: 'inverse',
     spinner: colors.textInverse,
   },
   secondary: {
-    bg: colors.surfaceElevated,
+    bg: colors.surfacePrimary,
     border: colors.borderMedium,
     tone: 'primary',
     spinner: colors.textPrimary,
@@ -90,7 +90,7 @@ export function Button({
   const dimmed = !!disabled && !loading;
   const palette = dimmed
     ? {
-        bg: colors.surfaceElevated,
+        bg: colors.surfaceSecondary,
         border: colors.borderSubtle,
         tone: 'disabled' as TextTone,
         spinner: colors.textDisabled,
@@ -113,7 +113,7 @@ export function Button({
       accessibilityState={{ busy: !!loading }}
       hitSlop={size === 'small' ? { top: 4, bottom: 4, left: 4, right: 4 } : undefined}
       containerStyle={fullWidth ? { alignSelf: 'stretch' } : { alignSelf: 'flex-start' }}
-      pressedStyle={variant === 'primary' ? { backgroundColor: colors.whiteSecondary } : undefined}
+      pressedStyle={variant === 'primary' ? { backgroundColor: colors.inkSecondary } : undefined}
       style={{
         minHeight: Math.max(heights[size], size === 'small' ? heights.small : layout.minTapTarget),
         paddingHorizontal: paddings[size],

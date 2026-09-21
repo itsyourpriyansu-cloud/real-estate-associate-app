@@ -124,7 +124,7 @@ function TabItem({
             width: 24,
             height: 2,
             borderRadius: radius.pill,
-            backgroundColor: colors.whitePrimary,
+            backgroundColor: colors.inkPrimary,
           },
           indicatorStyle,
         ]}

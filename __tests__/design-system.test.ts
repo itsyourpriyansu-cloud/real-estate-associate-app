@@ -30,28 +30,35 @@ const contrast = (a: string, b: string) => {
 };
 
 describe('colour tokens', () => {
-  it('match the Stage 2 palette exactly', () => {
+  it('match the Vara light palette exactly', () => {
     expect(colors).toMatchObject({
-      backgroundPrimary: '#070707',
-      backgroundSecondary: '#0D0D0D',
-      backgroundTertiary: '#121212',
-      surfacePrimary: '#111111',
-      surfaceSecondary: '#171717',
-      surfaceElevated: '#1D1D1D',
-      surfacePressed: '#232323',
-      whitePrimary: '#F7F7F5',
-      whiteSecondary: '#E8E8E5',
-      textPrimary: '#F5F5F3',
-      textSecondary: '#A7A7A2',
-      textTertiary: '#72726E',
-      textDisabled: '#51514E',
-      borderSubtle: 'rgba(255,255,255,0.08)',
-      borderMedium: 'rgba(255,255,255,0.14)',
-      borderStrong: 'rgba(255,255,255,0.22)',
+      backgroundPrimary: '#F1F2F4',
+      backgroundSecondary: '#F7F8F9',
+      backgroundTertiary: '#EAEBEE',
+      surfacePrimary: '#FFFFFF',
+      surfaceSecondary: '#F5F6F8',
+      surfaceElevated: '#FFFFFF',
+      surfacePressed: '#E9EAEE',
+      inkPrimary: '#121316',
+      inkSecondary: '#2B2C31',
+      surfaceInverse: '#17181B',
+      surfaceInverseRaised: '#26272C',
+      textOnInverse: '#F6F6F7',
+      textOnInverseMuted: '#A9ABB3',
+      textPrimary: '#121316',
+      textSecondary: '#565860',
+      textTertiary: '#666870',
+      textDisabled: '#A6A8B0',
+      textInverse: '#FFFFFF',
+      borderSubtle: 'rgba(18,19,22,0.06)',
+      borderMedium: 'rgba(18,19,22,0.10)',
+      borderStrong: 'rgba(18,19,22,0.18)',
+      brand: '#2E9B6A',
+      brandStrong: '#167547',
     });
   });
 
-  const backgrounds = [
+  const lightSurfaces = [
     'backgroundPrimary',
     'backgroundSecondary',
     'backgroundTertiary',
@@ -60,39 +67,57 @@ describe('colour tokens', () => {
     'surfaceElevated',
   ] as const;
 
-  it.each(backgrounds)('primary text is AAA (>= 7:1) on %s', (bg) => {
+  it.each(lightSurfaces)('primary text is AAA (>= 7:1) on %s', (bg) => {
     expect(contrast(colors.textPrimary, colors[bg])).toBeGreaterThanOrEqual(7);
   });
 
-  it.each(backgrounds)('secondary text is AA (>= 4.5:1) on %s', (bg) => {
+  it.each(lightSurfaces)('secondary text is AA (>= 4.5:1) on %s', (bg) => {
     expect(contrast(colors.textSecondary, colors[bg])).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('tertiary text is documented as below AA and only for non-essential text: >= 3:1 (WCAG non-text minimum)', () => {
-    // #72726E is the brief's value. It does NOT reach 4.5:1, so essential text (timestamps, counts,
-    // labels) uses textSecondary; tertiary is limited to placeholders, chevrons and completed items.
-    for (const bg of backgrounds) {
-      const ratio = contrast(colors.textTertiary, colors[bg]);
-      expect(ratio).toBeGreaterThanOrEqual(3);
-      expect(ratio).toBeLessThan(4.5);
-    }
+  it.each(lightSurfaces)('tertiary text is AA (>= 4.5:1) on %s', (bg) => {
+    // The light theme lifts the old dark-theme exception: tertiary is now safe for meta and hints.
+    expect(contrast(colors.textTertiary, colors[bg])).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('button labels are AAA: inverse text on the white primary button', () => {
-    expect(contrast(colors.textInverse, colors.whitePrimary)).toBeGreaterThanOrEqual(7);
-    expect(contrast(colors.textInverse, colors.whiteSecondary)).toBeGreaterThanOrEqual(7);
+  it('button labels are AAA: white text on the ink primary button, in both states', () => {
+    expect(contrast(colors.textInverse, colors.inkPrimary)).toBeGreaterThanOrEqual(7);
+    expect(contrast(colors.textInverse, colors.inkSecondary)).toBeGreaterThanOrEqual(7);
+  });
+
+  it.each(['surfaceInverse', 'surfaceInverseRaised'] as const)(
+    'text on the charcoal %s is AA (primary AAA)',
+    (bg) => {
+      expect(contrast(colors.textOnInverse, colors[bg])).toBeGreaterThanOrEqual(7);
+      expect(contrast(colors.textOnInverseMuted, colors[bg])).toBeGreaterThanOrEqual(4.5);
+    },
+  );
+
+  it('the green accent reaches AA where it carries text', () => {
+    expect(contrast(colors.brandStrong, colors.surfacePrimary)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colors.brandStrong, colors.backgroundPrimary)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colors.brandStrong, colors.brandSoft)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colors.textInverse, colors.brandStrong)).toBeGreaterThanOrEqual(4.5);
   });
 
   it.each(['success', 'warning', 'danger', 'info'] as const)(
-    'semantic %s is AA on the page and on cards',
+    'semantic %s is AA on the page and on cards and tiles',
     (key) => {
       expect(contrast(colors[key], colors.backgroundPrimary)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(colors[key], colors.surfacePrimary)).toBeGreaterThanOrEqual(4.5);
       expect(contrast(colors[key], colors.surfaceSecondary)).toBeGreaterThanOrEqual(4.5);
     },
   );
 
-  it('keeps semantic colours out of the neutral surfaces and text', () => {
-    const semantic = new Set<string>([colors.success, colors.warning, colors.danger, colors.info]);
+  it('keeps semantic and brand colours out of the neutral surfaces and text', () => {
+    const coloured = new Set<string>([
+      colors.success,
+      colors.warning,
+      colors.danger,
+      colors.info,
+      colors.brand,
+      colors.brandStrong,
+    ]);
     const neutral = [
       'backgroundPrimary',
       'backgroundSecondary',
@@ -101,18 +126,20 @@ describe('colour tokens', () => {
       'surfaceSecondary',
       'surfaceElevated',
       'surfacePressed',
-      'whitePrimary',
-      'whiteSecondary',
+      'inkPrimary',
+      'inkSecondary',
+      'surfaceInverse',
+      'surfaceInverseRaised',
       'textPrimary',
       'textSecondary',
       'textTertiary',
       'textDisabled',
     ] as const;
-    for (const key of neutral) expect(semantic.has(colors[key])).toBe(false);
+    for (const key of neutral) expect(coloured.has(colors[key])).toBe(false);
   });
 
   it('gives every tone a foreground, background and border', () => {
-    for (const tone of ['neutral', 'success', 'warning', 'danger', 'info'] as const) {
+    for (const tone of ['neutral', 'brand', 'success', 'warning', 'danger', 'info'] as const) {
       expect(toneColors[tone]).toEqual({
         fg: expect.any(String),
         bg: expect.any(String),
@@ -138,8 +165,8 @@ describe('spacing, radius, elevation, motion', () => {
     expect(layout.minTapTarget).toBeGreaterThanOrEqual(44);
   });
 
-  it('radius is restrained', () => {
-    expect(radius).toEqual({ xs: 6, sm: 10, md: 14, lg: 18, xl: 24, pill: 999 });
+  it('radius is generous and consistent: cards xl, tiles lg, controls md', () => {
+    expect(radius).toEqual({ xs: 8, sm: 12, md: 16, lg: 20, xl: 28, pill: 999 });
   });
 
   it('icons: 18–22 is the working range', () => {
@@ -164,10 +191,28 @@ describe('spacing, radius, elevation, motion', () => {
     expect(opacity.disabled).toBeLessThan(opacity.pressed);
   });
 
-  it('only overlays are allowed a shadow', () => {
-    expect(theme.elevation.overlay).toHaveProperty('shadowRadius');
-    for (const key of ['flat', 'raised', 'elevated'] as const) {
+  it('shadows are soft and wide: flat surfaces and tiles have none, overlays have the deepest', () => {
+    for (const key of ['flat', 'tile'] as const) {
       expect(theme.elevation[key]).not.toHaveProperty('shadowRadius');
+    }
+    const shadowed = ['raised', 'elevated', 'overlay', 'inverse'] as const;
+    for (const key of shadowed) {
+      const { shadowOpacity, shadowRadius } = theme.elevation[key];
+      expect(shadowOpacity).toBeLessThanOrEqual(0.25); // never a hard drop shadow
+      expect(shadowRadius).toBeGreaterThanOrEqual(16); // always wide
+    }
+    expect(theme.elevation.overlay.shadowOpacity).toBeGreaterThan(
+      theme.elevation.raised.shadowOpacity,
+    );
+  });
+
+  it('motion has entrance, stagger, count-up and progress timings that stay under a second and a half', () => {
+    expect(motion.staggerStep).toBeGreaterThanOrEqual(30);
+    expect(motion.staggerStep).toBeLessThanOrEqual(60);
+    expect(motion.staggerStep * motion.staggerMax).toBeLessThan(400);
+    for (const ms of [motion.enterMs, motion.countUpMs, motion.progressFillMs]) {
+      expect(ms).toBeGreaterThanOrEqual(300);
+      expect(ms).toBeLessThanOrEqual(1500);
     }
   });
 });
@@ -233,6 +278,14 @@ describe('status language', () => {
       expect(['dot', 'clock', 'check', 'lock', 'minus']).toContain(plotStatusTokens[status].icon);
     }
     expect(new Set(plotStatusSchema.options.map((s) => plotStatusTokens[s].icon)).size).toBe(5);
+  });
+
+  it('status colours read on white cards (AA), so status is legible without its icon too', () => {
+    for (const status of ['AVAILABLE', 'ON_HOLD', 'BLOCKED'] as const) {
+      expect(
+        contrast(plotStatusTokens[status].color, colors.surfacePrimary),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it('composes one theme from the same token objects', () => {

@@ -107,9 +107,7 @@ export function ProgressMeter({
           overflow: 'hidden',
         }}
       >
-        <View
-          style={{ width: `${ratio * 100}%`, height: 6, backgroundColor: colors.whitePrimary }}
-        />
+        <View style={{ width: `${ratio * 100}%`, height: 6, backgroundColor: colors.inkPrimary }} />
       </View>
     </View>
   );

@@ -1,10 +1,13 @@
-/** Radius tokens. Use larger radii only for major surfaces; controls stay tight. */
+/**
+ * Radius tokens. Generous and consistent: cards are `xl`, tiles and rows `lg`, controls `md`,
+ * chips and the dock are pills. Smaller radii are for small marks (badges, hatches).
+ */
 export const radius = {
-  xs: 6,
-  sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 24,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 28,
   pill: 999,
 } as const;
 

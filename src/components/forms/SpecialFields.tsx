@@ -46,8 +46,8 @@ export function SearchField({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textTertiary}
-        selectionColor={colors.whitePrimary}
-        cursorColor={colors.whitePrimary}
+        selectionColor={colors.inkPrimary}
+        cursorColor={colors.inkPrimary}
         autoFocus={autoFocus}
         autoCorrect={false}
         returnKeyType="search"

@@ -43,7 +43,12 @@ const SWATCH_GROUPS: { label: string; keys: (keyof typeof colors)[] }[] = [
     label: 'Surfaces',
     keys: ['surfacePrimary', 'surfaceSecondary', 'surfaceElevated', 'surfacePressed'],
   },
-  { label: 'Whites', keys: ['whitePrimary', 'whiteSecondary'] },
+  { label: 'Ink', keys: ['inkPrimary', 'inkSecondary'] },
+  {
+    label: 'Inverse (charcoal)',
+    keys: ['surfaceInverse', 'surfaceInverseRaised', 'textOnInverse', 'textOnInverseMuted'],
+  },
+  { label: 'Brand (green)', keys: ['brand', 'brandStrong', 'brandMuted', 'brandSoft'] },
   { label: 'Text', keys: ['textPrimary', 'textSecondary', 'textTertiary', 'textDisabled'] },
   { label: 'Borders', keys: ['borderSubtle', 'borderMedium', 'borderStrong'] },
   { label: 'Semantic (state only)', keys: ['success', 'warning', 'danger', 'info'] },
@@ -67,7 +72,7 @@ export function Foundations() {
 
       <ShowcaseSection
         title="Colour"
-        note="Black, white and grey carry ≥ 90% of any screen. Semantic colours mark state only."
+        note="Soft grey page, white cards, ink actions. Green is the only accent; semantic colours mark state only."
       >
         {SWATCH_GROUPS.map((group) => (
           <Specimen key={group.label} label={group.label}>
@@ -111,7 +116,7 @@ export function Foundations() {
                   style={{
                     width: value,
                     height: 8,
-                    backgroundColor: colors.whiteSecondary,
+                    backgroundColor: colors.inkSecondary,
                     borderRadius: radius.xs,
                   }}
                 />

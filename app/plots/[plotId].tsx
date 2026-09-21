@@ -1,15 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { PlaceholderScreen } from '@/components/feedback';
+import { PlotDetailScreen } from '@/features/projects/PlotDetailScreen';
 
-export default function PlotDetailScreen() {
+export default function PlotDetailRoute() {
   const { plotId } = useLocalSearchParams<{ plotId: string }>();
-  return (
-    <PlaceholderScreen
-      back
-      title="Plot detail"
-      route={`/plots/${plotId}`}
-      description="Plot facts, cost preview, WhatsApp share, shortlist and Prototype Hold. Built in Stage B."
-    />
-  );
+  return <PlotDetailScreen plotId={plotId} />;
 }

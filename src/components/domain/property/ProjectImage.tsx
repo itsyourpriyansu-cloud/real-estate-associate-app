@@ -46,8 +46,8 @@ function SitePlanArt({ seed, height }: { seed: string; height: number }) {
               width={cellW - inset * 2}
               height={cellH - inset * 2}
               rx={2}
-              fill={index === highlight ? colors.textSecondary : colors.surfaceSecondary}
-              fillOpacity={index === highlight ? 0.55 : 1}
+              fill={index === highlight ? colors.brand : colors.surfacePrimary}
+              fillOpacity={index === highlight ? 0.45 : 1}
               stroke={colors.borderMedium}
               strokeWidth={1}
             />

@@ -1,12 +1,5 @@
-import { PlaceholderScreen } from '@/components/feedback';
+import { SettingsScreen } from '@/features/profile/SettingsScreen';
 
-export default function SettingsScreen() {
-  return (
-    <PlaceholderScreen
-      back
-      title="Settings"
-      route="/settings"
-      description="Settings shell: notifications, appearance (dark, locked) and support. Built in Stage C."
-    />
-  );
+export default function SettingsRoute() {
+  return <SettingsScreen />;
 }

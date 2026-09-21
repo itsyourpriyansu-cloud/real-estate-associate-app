@@ -27,6 +27,9 @@ export const layout = {
   headerHeight: 56,
   /** Tab bar content height, excluding the bottom safe-area inset. */
   tabBarHeight: 56,
+  /** Floating dock: pill height and its gap above the bottom safe area. */
+  dockHeight: 64,
+  dockOffset: space[12],
   /** Max readable width on tablets / web previews. */
   maxContentWidth: 640,
 } as const;

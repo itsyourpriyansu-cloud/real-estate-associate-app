@@ -1,15 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { PlaceholderScreen } from '@/components/feedback';
+import { MemberDetailScreen } from '@/features/team/MemberDetailScreen';
 
-export default function TeamMemberScreen() {
+export default function TeamMemberRoute() {
   const { memberId } = useLocalSearchParams<{ memberId: string }>();
-  return (
-    <PlaceholderScreen
-      back
-      title="Team member"
-      route={`/team/${memberId}`}
-      description="One member's details, sales and site visits. Reads TeamRepository.getMember. Built in Stage E."
-    />
-  );
+  return <MemberDetailScreen memberId={memberId} />;
 }

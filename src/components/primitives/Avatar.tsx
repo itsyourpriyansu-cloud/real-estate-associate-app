@@ -40,9 +40,9 @@ export function Avatar({ name, imageUrl, size = 'md', verified }: AvatarProps) {
           height: dimension,
           borderRadius: radius.pill,
           overflow: 'hidden',
-          backgroundColor: colors.surfaceElevated,
+          backgroundColor: colors.brandSoft,
           borderWidth: 1,
-          borderColor: colors.borderMedium,
+          borderColor: colors.borderSubtle,
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -54,7 +54,7 @@ export function Avatar({ name, imageUrl, size = 'md', verified }: AvatarProps) {
             contentFit="cover"
           />
         ) : (
-          <AppText style={initialsStyle[size]} tone="primary">
+          <AppText style={initialsStyle[size]} tone="brand">
             {initials(name)}
           </AppText>
         )}
@@ -65,11 +65,11 @@ export function Avatar({ name, imageUrl, size = 'md', verified }: AvatarProps) {
             position: 'absolute',
             right: -2,
             bottom: -2,
-            backgroundColor: colors.backgroundPrimary,
+            backgroundColor: colors.surfacePrimary,
             borderRadius: radius.pill,
           }}
         >
-          <Icon icon={BadgeCheck} size="sm" color={colors.whitePrimary} />
+          <Icon icon={BadgeCheck} size="sm" color={colors.brandStrong} />
         </View>
       ) : null}
     </View>

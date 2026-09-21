@@ -212,15 +212,14 @@ describe('profile route wiring: screen → feature hook → repository → mock 
 
   it('renders the seeded associate through the repository contract', async () => {
     await renderProfile();
-    expect(
-      await screen.findByText(/K\. V\. Raghunath Reddy · Senior Associate · YH-APL2-1048/),
-    ).toBeTruthy();
+    expect(await screen.findByText('K. V. Raghunath Reddy')).toBeTruthy();
+    expect(await screen.findByText(/Senior Associate · YH-APL2-1048/)).toBeTruthy();
   });
 
   it('shows a recoverable message (no raw error text) when the repository fails', async () => {
     usePrototypeStore.getState().setScenario('REPOSITORY_ERRORS');
     await renderProfile();
-    expect(await screen.findByText('Couldn’t load your profile.')).toBeTruthy();
+    expect(await screen.findByText('Couldn’t load your profile')).toBeTruthy();
     expect(screen.queryByText(/Simulated/)).toBeNull();
   });
 

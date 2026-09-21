@@ -233,7 +233,7 @@ describe('ProjectCard', () => {
     const { realRise } = await loadSamples();
     await show(<ProjectCard project={realRise} />);
     expect(screen.getByText('Real Rise')).toBeTruthy();
-    expect(screen.getByText('Bangalore Highway')).toBeTruthy();
+    expect(screen.getByText('Bangalore Highway · Completed')).toBeTruthy();
     expect(screen.getByText('₹26.8L')).toBeTruthy();
     expect(screen.getByText('150–360 sq yd')).toBeTruthy();
     expect(screen.getByText('21 available')).toBeTruthy();

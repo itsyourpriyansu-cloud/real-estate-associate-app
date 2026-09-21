@@ -12,13 +12,15 @@ export type FieldState = 'idle' | 'focused' | 'filled' | 'error' | 'disabled';
 export function fieldSurface(state: FieldState) {
   switch (state) {
     case 'focused':
-      return { backgroundColor: colors.surfaceElevated, borderColor: colors.borderStrong };
+      return { backgroundColor: colors.surfacePrimary, borderColor: colors.brandStrong };
     case 'error':
-      return { backgroundColor: colors.surfaceSecondary, borderColor: colors.danger };
+      return { backgroundColor: colors.surfacePrimary, borderColor: colors.danger };
     case 'filled':
-      return { backgroundColor: colors.surfaceSecondary, borderColor: colors.borderMedium };
-    default:
+      return { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong };
+    case 'disabled':
       return { backgroundColor: colors.surfaceSecondary, borderColor: colors.borderSubtle };
+    default:
+      return { backgroundColor: colors.surfacePrimary, borderColor: colors.borderMedium };
   }
 }
 
@@ -58,8 +60,8 @@ export function FieldFrame({
 }
 
 export const fieldShape = {
-  minHeight: 52,
-  borderRadius: radius.sm,
+  minHeight: 54,
+  borderRadius: radius.md,
   borderWidth: 1,
   paddingHorizontal: space[16],
   flexDirection: 'row',

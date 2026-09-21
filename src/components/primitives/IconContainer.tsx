@@ -30,8 +30,8 @@ export function IconContainer({
       style={{
         width: dimension,
         height: dimension,
-        borderRadius: shape === 'circle' ? radius.pill : radius.sm,
-        backgroundColor: tone === 'neutral' ? colors.surfaceElevated : palette.bg,
+        borderRadius: shape === 'circle' ? radius.pill : radius.md,
+        backgroundColor: tone === 'neutral' ? colors.surfaceSecondary : palette.bg,
         borderWidth: 1,
         borderColor: tone === 'neutral' ? colors.borderSubtle : palette.border,
         alignItems: 'center',

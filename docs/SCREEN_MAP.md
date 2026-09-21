@@ -1,6 +1,6 @@
 # Screen map
 
-**Status: restructured around the "Android APP Flow" wireframe (structure only).** The route tree, session model, guards, domain additions and repository contracts below are in place. Every _new_ route is a `PlaceholderScreen`; feature UI is built in the stages listed at the bottom. Login and OTP are real (`features/auth`); `/projects` still renders the Stage 2 `ProjectsPreview`.
+**Status: the "Android APP Flow" wireframe is built and working on seed data.** Every route below renders a real screen (Home, logins, guest hub, dashboard, the seven sections, project/inventory/plot, profile, settings, prototype controls). Look and motion follow the Vara light design system ([DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)); how to run and check it: [RUN_THE_PROTOTYPE.md](RUN_THE_PROTOTYPE.md).
 
 The previous CRM shell (five tabs: Home · Leads · Projects · Tasks · Inbox) is **parked, not deleted** — see [Parked routes](#parked-routes-crm). Routes use domain ids (`projectId`, `plotId`, `visitId`, `memberId`) so they are deep-link friendly.
 
@@ -78,28 +78,31 @@ Their **route files were removed from `app/`**; the feature code, components, re
 
 ## Navigation model
 
-- **No tab bar.** The associate's primary navigation _is_ the seven dashboard rows (visible, not hidden). The hamburger in the dashboard header opens a **menu sheet** for secondary items only: Profile · Settings · Prototype controls · Sign out. The profile icon opens `/profile`. No drawer dependency was added.
+- **A floating dock, not a tab bar.** Signed-in associates get a charcoal pill dock — Home (`/dashboard`) · Projects (`/projects`) · Team (`/team`) · Profile (`/profile`) — shown **only on those four top-level routes** (`dockKeyFor`, tested); pushed screens have a back button. The seven dashboard rows remain the primary navigation (visible, not hidden). The round menu button in the header opens a **menu sheet** for secondary items: Profile · Settings · Prototype controls · Sign out. No drawer dependency was added.
 - **Guarding:** every route group except `(public)` is inside `Stack.Protected` keyed on the session kind; `(public)` is only reachable signed out. Signing in/out flips the guards and Expo Router falls back to `index`, which redirects by kind. Tested (`__tests__/architecture.test.ts`, `__tests__/session.test.ts`).
 - Detail routes push onto the root stack and return to the previous scroll/filter state.
 
-## Routes → owner, data, stage
+## Routes → screen, data
 
-| Route                                                                 | Feature hook reads (contracts)                                         | Primary job                                                         | Stage |
-| --------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------- | ----- |
-| `/home`                                                               | `SummaryRepository.getPublicSummary`                                   | Show public numbers; choose Guest / Associate / Simple              | A     |
-| `/associate-login`, `/simple-login`, `/otp`                           | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; wrong-role numbers get an inline error                 | A     |
-| `/guest-home`                                                         | —                                                                      | One row: Our Projects; sign out / exit                              | A     |
-| `/projects`, `/projects/:id`, `/projects/:id/inventory`, `/plots/:id` | `ProjectRepository`, `PlotRepository`                                  | Browse projects, inventory, plot detail                             | B     |
-| `/dashboard`                                                          | `SummaryRepository.getAssociateSummary`                                | 2 summary containers (with **pending** state) + 7 section rows      | C     |
-| `/site-visits`, `/site-visits/:id`                                    | `VisitRepository.list({associateIds})`, leads, projects                | Visit log, details, statuses; team total                            | D     |
-| `/price-calculator`                                                   | `ProjectRepository`, `PlotRepository`, `calculatePlotCost` (domain)    | Cost preview (never a quotation)                                    | D     |
-| `/team`, `/team/:id`, `/team/add`                                     | `TeamRepository`                                                       | Downline list, member detail, add member                            | E     |
-| `/team-sales`                                                         | `SalesRepository.listTeam`, `getTargets`                               | Team performance vs targets                                         | E     |
-| `/live-booking`, `/live-booking/:plotId`                              | `ProjectRepository`, `PlotRepository`, `SalesRepository.createBooking` | Pick plot → confirm booking (**prototype hold + sale record only**) | F     |
-| `/profile`, `/settings`, `/prototype-controls`                        | `UserRepository.getCurrent`, `preferencesStore`, `prototypeStore`      | Account, preferences, reset demo data, sign out                     | C     |
+| Route                                          | Screen (`src/features/…`)                                            | Reads (contracts)                                                      | Primary job                                                     |
+| ---------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `/home`                                        | `landing/PublicHome`                                                 | `SummaryRepository.getPublicSummary`                                   | Public numbers; choose Guest / Associate / Simple; Login        |
+| `/associate-login`, `/simple-login`, `/otp`    | `auth/LoginScreen`, `OtpForm`                                        | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; a number on the wrong login gets an inline error   |
+| `/guest-home`                                  | `guest/GuestHome`                                                    | —                                                                      | One row: Our Projects; way back                                 |
+| `/projects`                                    | `projects/ProjectsScreen`                                            | `ProjectRepository.list`                                               | Browse projects; filter by status                               |
+| `/projects/:id`                                | `projects/ProjectDetailScreen`                                       | `getById`, `getInventorySummary`                                       | Facts, price range, inventory, highlights, amenities            |
+| `/projects/:id/inventory`                      | `projects/InventoryScreen`                                           | `PlotRepository.list`                                                  | Legend, status filters, plot grid                               |
+| `/plots/:id`                                   | `projects/PlotDetailScreen`                                          | `PlotRepository.getById`                                               | Plot facts and cost preview; **Book this plot** (associates)    |
+| `/dashboard`                                   | `dashboard/DashboardScreen`                                          | `SummaryRepository.getAssociateSummary`, `UserRepository`              | Hero card, performance (with **Pending**), the seven rows       |
+| `/live-booking`, `/live-booking/:plotId`       | `booking/LiveBookingScreen`, `BookingConfirmScreen`                  | `ProjectRepository`, `PlotRepository`, `SalesRepository.createBooking` | Pick a plot → customer → confirm → success (**prototype only**) |
+| `/price-calculator`                            | `calculator/PriceCalculatorScreen`                                   | `ProjectRepository`, `PlotRepository`, `calculatePlotCost` (domain)    | Cost preview (never a quotation)                                |
+| `/site-visits`, `/site-visits/:id`             | `visits/SiteVisitsScreen`, `VisitDetailScreen`                       | `VisitRepository.list({associateIds})`, leads, projects, plots         | Visit log, filters, details, outcome                            |
+| `/team-sales`                                  | `sales/TeamSalesScreen`                                              | `SalesRepository.listTeam`, `getTargets`                               | Month vs target (hatched progress), top sellers, sales          |
+| `/team`, `/team/:id`, `/team/add`              | `team/MyTeamScreen`, `MemberDetailScreen`, `AddMemberScreen`         | `TeamRepository`                                                       | Downline by level, member detail, add a member                  |
+| `/profile`, `/settings`, `/prototype-controls` | `profile/ProfileScreen`, `SettingsScreen`, `PrototypeControlsScreen` | `UserRepository.getCurrent`, stores                                    | Account, preferences, scenarios and demo clock, reset, sign out |
 
-`/profile` is wired end-to-end (screen → `useCurrentUser` → `userRepository` → mock → seed) and covered by a test, including its repository-error state. It is the reference implementation of the pattern.
+`/profile` is the reference for the pattern: screen → `useCurrentUser` → `userRepository` → mock → seed, with a test for its repository-error state.
 
-## Placeholder → real screen checklist
+## Adding a screen
 
-When replacing a placeholder: use `ScreenLayout`/primitives, add the feature hook under `src/features/<module>/`, cover loading/empty/error/offline (see [PROTOTYPE_STATES.md](PROTOTYPE_STATES.md)), then remove the placeholder usage. Delete `components/feedback/PlaceholderScreen.tsx` once no route uses it.
+No route uses `PlaceholderScreen` any more; `components/feedback/PlaceholderScreen.tsx` can be deleted. New screens follow the same recipe: a route file that renders a feature screen, a hook under `src/features/<module>/` that reads a repository, `ResourceBoundary` for loading / error / empty, and tokens for everything visual.

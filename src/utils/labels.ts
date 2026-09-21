@@ -3,8 +3,10 @@ import type {
   LeadSource,
   LeadStage,
   NotificationType,
+  ProjectStatus,
   TaskType,
   TimelineEventType,
+  VisitOutcome,
   VisitStatus,
 } from '@/domain';
 
@@ -49,6 +51,19 @@ export const TASK_TYPE_LABEL: Record<TaskType, string> = {
   FOLLOW_UP: 'Follow-up',
   SITE_VISIT: 'Site visit',
   NOTE: 'Note',
+};
+
+export const VISIT_OUTCOME_LABEL: Record<VisitOutcome, string> = {
+  VERY_INTERESTED: 'Very interested',
+  INTERESTED: 'Interested',
+  FOLLOW_UP: 'Needs a follow-up',
+  NOT_INTERESTED: 'Not interested',
+};
+
+export const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
+  ONGOING: 'Ongoing',
+  COMPLETED: 'Completed',
+  UPCOMING: 'Upcoming',
 };
 
 export const VISIT_STATUS_LABEL: Record<VisitStatus, string> = {

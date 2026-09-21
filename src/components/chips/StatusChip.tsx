@@ -8,6 +8,7 @@ import { Icon } from '../primitives/Icon';
 
 const textToneFor: Record<Tone, TextTone> = {
   neutral: 'secondary',
+  brand: 'brand',
   success: 'success',
   warning: 'warning',
   danger: 'danger',

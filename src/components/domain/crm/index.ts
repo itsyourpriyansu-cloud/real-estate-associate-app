@@ -5,3 +5,4 @@ export * from './NextActionCard';
 export * from './TaskCard';
 export * from './TimelineEventRow';
 export * from './VisitCard';
+export * from './VisitHistoryRow';

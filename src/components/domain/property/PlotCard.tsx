@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import type { Plot } from '@/domain';
-import { colors, motion, plotStatusTokens, radius, space } from '@/design-system';
+import { colors, elevation, motion, plotStatusTokens, radius, space } from '@/design-system';
 import { formatArea, formatInr } from '@/utils/format';
 import { FACING_LABEL } from '@/utils/labels';
 
@@ -44,12 +44,11 @@ export function PlotCard({
       accessibilityLabel={label}
       accessibilityState={{ selected: !!selected }}
       style={{
-        borderRadius: radius.md,
+        ...elevation.raised,
+        borderRadius: radius.lg,
         padding: space[12],
         gap: space[8],
-        backgroundColor: selected ? colors.surfaceElevated : colors.surfaceSecondary,
-        borderWidth: 1,
-        borderColor: selected ? colors.borderStrong : colors.borderSubtle,
+        ...(selected ? { backgroundColor: colors.brandSoft, borderColor: colors.brand } : null),
       }}
     >
       <View

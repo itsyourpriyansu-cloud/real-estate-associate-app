@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "Associate",
+    "name": "Vara Real Estates",
     "slug": "real-estate-associate-app",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "associate",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#050505",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F1F2F4",
     "ios": {
       "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#050505",
+        "backgroundColor": "#17181B",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -25,7 +25,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#050505",
+          "backgroundColor": "#F1F2F4",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }

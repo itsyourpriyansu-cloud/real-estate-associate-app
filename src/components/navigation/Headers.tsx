@@ -81,7 +81,13 @@ export function DetailHeader({
 }) {
   return (
     <View style={[bar, { paddingHorizontal: space[8] }]}>
-      <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={onBack} haptic="none" />
+      <IconButton
+        icon={ChevronLeft}
+        accessibilityLabel="Back"
+        variant="filled"
+        onPress={onBack}
+        haptic="none"
+      />
       <View style={{ flex: 1, alignItems: 'center' }}>
         {title ? (
           <AppText variant="headingSM" header numberOfLines={1}>

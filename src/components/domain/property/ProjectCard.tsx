@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import type { Project } from '@/domain';
 import { elevation, radius, space } from '@/design-system';
 import { formatAreaRange, formatInr } from '@/utils/format';
+import { PROJECT_STATUS_LABEL } from '@/utils/labels';
 
 import { Button } from '../../buttons/Button';
 import { IconButton } from '../../buttons/IconButton';
@@ -33,7 +34,7 @@ export function ProjectCard({
 }) {
   const soldOut = project.availableUnits === 0;
   return (
-    <PressableCard style={[elevation.raised, { borderRadius: radius.lg, overflow: 'hidden' }]}>
+    <PressableCard style={[elevation.raised, { borderRadius: radius.xl, overflow: 'hidden' }]}>
       <CardPressRegion
         onPress={onPress}
         accessibilityLabel={`${project.name}, ${project.location}. From ${formatInr(project.startingPrice)}. ${project.availableUnits} of ${project.totalUnits} plots available.`}
@@ -64,7 +65,7 @@ export function ProjectCard({
               />
             </View>
             <AppText tone="secondary" numberOfLines={1}>
-              {project.location}
+              {project.location} · {PROJECT_STATUS_LABEL[project.status]}
             </AppText>
           </View>
           <View style={{ flexDirection: 'row', gap: space[24] }}>
@@ -82,12 +83,14 @@ export function ProjectCard({
         <View style={{ flex: 1 }}>
           <Button label="View inventory" size="medium" fullWidth onPress={onViewInventory} />
         </View>
-        <IconButton
-          icon={Share2}
-          accessibilityLabel={`Share ${project.name}`}
-          variant="outline"
-          onPress={onShare}
-        />
+        {onShare ? (
+          <IconButton
+            icon={Share2}
+            accessibilityLabel={`Share ${project.name}`}
+            variant="outline"
+            onPress={onShare}
+          />
+        ) : null}
       </View>
     </PressableCard>
   );
@@ -97,7 +100,7 @@ export function ProjectCard({
 export function ProjectHero({ project }: { project: Project }) {
   return (
     <View style={{ gap: space[16] }}>
-      <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+      <View style={{ borderRadius: radius.xl, overflow: 'hidden' }}>
         <ProjectImage
           source={project.heroImageUrl}
           height={200}

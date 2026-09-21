@@ -13,7 +13,7 @@ export interface FilterChipProps {
   testID?: string;
 }
 
-/** Selectable filter pill. Selected = solid white (the only bright thing in a chip row). */
+/** Selectable filter pill. Selected = solid ink (the one dark mark in a chip row). */
 export function FilterChip({ label, selected, count, onPress, disabled, testID }: FilterChipProps) {
   return (
     <PressableScale
@@ -25,7 +25,7 @@ export function FilterChip({ label, selected, count, onPress, disabled, testID }
       accessibilityLabel={count !== undefined ? `${label}, ${count}` : label}
       accessibilityState={{ selected: !!selected }}
       hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
-      pressedStyle={selected ? { backgroundColor: colors.whiteSecondary } : undefined}
+      pressedStyle={selected ? { backgroundColor: colors.inkSecondary } : undefined}
       style={{
         height: 36,
         paddingHorizontal: space[16],
@@ -33,9 +33,9 @@ export function FilterChip({ label, selected, count, onPress, disabled, testID }
         flexDirection: 'row',
         alignItems: 'center',
         gap: space[6],
-        backgroundColor: selected ? colors.whitePrimary : colors.transparent,
+        backgroundColor: selected ? colors.inkPrimary : colors.surfacePrimary,
         borderWidth: 1,
-        borderColor: selected ? colors.whitePrimary : colors.borderMedium,
+        borderColor: selected ? colors.inkPrimary : colors.borderMedium,
       }}
     >
       <AppText variant="labelLG" tone={selected ? 'inverse' : 'secondary'}>

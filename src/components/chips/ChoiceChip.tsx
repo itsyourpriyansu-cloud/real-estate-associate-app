@@ -31,20 +31,20 @@ export function ChoiceChip({ label, selected, icon, onPress, disabled, testID }:
       style={{
         minHeight: layout.minTapTarget,
         paddingHorizontal: space[16],
-        borderRadius: radius.sm,
+        borderRadius: radius.md,
         flexDirection: 'row',
         alignItems: 'center',
         gap: space[8],
-        backgroundColor: selected ? colors.surfaceElevated : colors.surfaceSecondary,
+        backgroundColor: selected ? colors.brandSoft : colors.surfacePrimary,
         borderWidth: 1,
-        borderColor: selected ? colors.borderStrong : colors.borderSubtle,
+        borderColor: selected ? colors.brand : colors.borderMedium,
       }}
     >
-      {icon ? <Icon icon={icon} size="md" tone={selected ? 'primary' : 'secondary'} /> : null}
-      <AppText variant="labelLG" tone={selected ? 'primary' : 'secondary'}>
+      {icon ? <Icon icon={icon} size="md" tone={selected ? 'brand' : 'secondary'} /> : null}
+      <AppText variant="labelLG" tone={selected ? 'brand' : 'secondary'}>
         {label}
       </AppText>
-      {selected ? <Icon icon={Check} size="md" tone="primary" /> : null}
+      {selected ? <Icon icon={Check} size="md" tone="brand" /> : null}
     </PressableScale>
   );
 }

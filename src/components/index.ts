@@ -1,3 +1,4 @@
+export * from './blocks';
 export * from './buttons';
 export * from './chips';
 export * from './domain';

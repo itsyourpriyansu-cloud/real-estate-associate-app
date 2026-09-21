@@ -1,3 +1,4 @@
+export * from './ChipRow';
 export * from './ChoiceChip';
 export * from './FilterChip';
 export * from './LeadChips';

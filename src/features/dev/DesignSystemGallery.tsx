@@ -10,6 +10,7 @@ import { ListsAndCrm } from './sections/ListsAndCrm';
 import { PropertyCommsDashboard } from './sections/PropertyCommsDashboard';
 import { FeedbackAndNav } from './sections/FeedbackAndNav';
 import { Foundations } from './sections/Foundations';
+import { VaraBlocks } from './sections/VaraBlocks';
 import { useShowcaseData } from './useShowcaseData';
 
 /**
@@ -33,10 +34,12 @@ export function DesignSystemGallery() {
       }
     >
       <AppText tone="secondary">
-        Typography, colour, controls, lists, CRM, property, communication, dashboard and feedback
-        components — every state, plus long names and very large amounts.
+        Typography, colour, the Vara blocks (brand, icons, hero card, summary tiles, navigation,
+        dock), controls, lists, CRM, property, communication, dashboard and feedback components —
+        every state, plus long names and very large amounts.
       </AppText>
       <Foundations />
+      <VaraBlocks />
       <Controls />
       <ResourceBoundary
         resource={showcase}

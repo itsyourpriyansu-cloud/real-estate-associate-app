@@ -1,204 +1,217 @@
-# Design system
+# Design system — Vara Real Estates
 
-The visual and interaction language of the app: premium, dark-first, monochrome, tactile, typography-driven. Inspired by the _principles_ behind CRED's design (beauty and utility together, rigour, restraint, honest data). No CRED logo, font, asset, screen or animation is used or copied.
+The visual and interaction language of the app: **light, soft, premium, minimal.** A pale grey page, white rounded cards, near-black ink for actions, one charcoal "inverse" surface for the hero card and the floating dock, and a single calm green accent. It was reshaped from a dark monochrome system after a fintech-wallet reference (soft cards, big radii, a floating pill dock, a dark hero card) — the _principles_ were adopted, no assets or brand were copied.
 
 **Where things live**
 
-| Layer                                         | Location                                                                                                    | Owner                     |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------- |
-| Tokens                                        | `src/design-system/` (`colors`, `spacing`, `typography`, `radius`, `elevation`, `motion`, `theme`, `fonts`) | 02 Design System Guardian |
-| Primitives                                    | `src/components/primitives/`                                                                                | 02                        |
-| Controls (buttons, forms, chips, lists)       | `src/components/{buttons,forms,chips,lists}/`                                                               | 02                        |
-| Feedback (states, sheets, toast, skeletons)   | `src/components/feedback/`                                                                                  | 02                        |
-| Shell (tab bar, headers)                      | `src/components/navigation/`                                                                                | 04 Navigation             |
-| Patterns (screen template, resource boundary) | `src/components/patterns/`                                                                                  | 02                        |
-| Domain components                             | `src/components/domain/{crm,property,communication,dashboard}/`                                             | 05 / 06 / 07              |
-| Live catalogue                                | `/dev/design-system` (development builds only)                                                              | 02                        |
+| Layer                                         | Location                                                                                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens                                        | `src/design-system/` (`colors`, `spacing`, `typography`, `radius`, `elevation`, `motion`, `theme`, `fonts`)                           |
+| Icon vocabulary                               | `src/components/primitives/icons.ts` (`icons.<meaning>`)                                                                              |
+| Primitives                                    | `src/components/primitives/` (`AppText`, `Icon`, `Surface`, `PressableScale`, `Reveal`, `AnimatedNumber`, `BrandMark`, …)             |
+| Controls (buttons, forms, chips, lists)       | `src/components/{buttons,forms,chips,lists}/`                                                                                         |
+| **Blocks** (the Vara composition pieces)      | `src/components/blocks/` (`HeroCard`, `SummaryPanel`/`StatTile`, `NavPanel`/`NavRow`, `ActionTile`, `LoginOptionCard`, `ProgressBar`) |
+| Feedback (states, sheets, toast, skeletons)   | `src/components/feedback/` (+ `SuccessMark`)                                                                                          |
+| Shell (dock, headers)                         | `src/components/navigation/` (`AssociateDock`, `AppHeader`, `Headers`)                                                                |
+| Patterns (screen template, resource boundary) | `src/components/patterns/`                                                                                                            |
+| Domain components                             | `src/components/domain/{property,team,crm,communication,dashboard}/`                                                                  |
+| Live catalogue                                | `/dev/design-system` (development builds only)                                                                                        |
 
-> The brief suggested `design-system/{tokens,primitives,components,patterns}`. The master spec (§6) and Stage 1 already fix tokens at `src/design-system/*.ts` and components under `src/components/*`, so the layers were mapped onto that structure rather than creating two competing homes. Import everything from `@/components` or `@/design-system`.
+Import everything from `@/components` or `@/design-system`.
 
 ## Philosophy
 
-1. **Hierarchy comes from typography, spacing and contrast — not from boxes.** Page → section → rows. A surface is used only where grouping helps comprehension. No card inside a card inside a card.
-2. **White is the accent.** Because the palette is monochrome, the one bright thing on a screen (the primary button, the selected chip, the unread count, the active tab) is the thing that matters. It is used deliberately and rarely.
-3. **Colour is state, never decoration.** Green/amber/red/blue mark inventory and task state on small marks (dot, icon, label). Nothing is a coloured panel or gradient.
-4. **Status is always icon + label + tone.** Never colour alone.
-5. **Motion confirms; it never decorates.** Short, springy, quiet, and off when Reduce Motion is on.
-6. **Numbers are the product.** Prices, sizes and counts are tabular, large where they matter, and never overflow.
+1. **Hierarchy comes from spacing, size and contrast** — then from soft white surfaces. One idea per card; no card inside a card inside a card.
+2. **Ink is the action colour.** The primary button, the selected filter, the dock are near-black. It is the one heavy thing on a light screen, so it is used once per screen.
+3. **Green is the only accent, and it is quiet.** It marks progress, selection, success and small brand touches (icon tiles, avatar initials, the toggle). It is never a wash and never a gradient.
+4. **The charcoal card is the exception.** Each screen has at most one inverse surface (the hero card) plus the floating dock.
+5. **Status is always icon + label + tone**, never colour alone.
+6. **Numbers are the product.** Tabular figures, large where they matter, counting up on arrival, and a figure that does not exist yet reads _Pending_, never `0`.
+7. **Motion confirms; it never decorates.** Short, springy, quiet — and off with Reduce Motion.
 
 ## Tokens
 
-Everything visual comes from a token. ESLint bans hex literals in UI code, and `architecture.test.ts` fails on any literal radius, spacing, font size, shadow or animation duration in `app/`, `src/features/` or `src/components/`. Component _dimensions_ (a 44pt target, a 26px checkbox) are allowed; the scales are not.
+Everything visual comes from a token. ESLint bans hex literals in UI code, and `__tests__/architecture.test.ts` fails on any literal radius, spacing, font size, shadow or animation duration in `app/`, `src/features/` or `src/components/`. Component _dimensions_ (a 44pt target, a 26px check ring) are allowed; the scales are not.
 
 ### Colour
 
-| Group      | Tokens                                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Background | `backgroundPrimary #070707` · `backgroundSecondary #0D0D0D` · `backgroundTertiary #121212`                                |
-| Surface    | `surfacePrimary #111111` · `surfaceSecondary #171717` · `surfaceElevated #1D1D1D` · `surfacePressed #232323`              |
-| White      | `whitePrimary #F7F7F5` · `whiteSecondary #E8E8E5`                                                                         |
-| Text       | `textPrimary #F5F5F3` · `textSecondary #A7A7A2` · `textTertiary #72726E` · `textDisabled #51514E` · `textInverse #070707` |
-| Border     | `borderSubtle` / `borderMedium` / `borderStrong` = white at 8% / 14% / 22%                                                |
-| Semantic   | `success #70D7A0` · `warning #E8C26A` · `danger #F07A7A` · `info #8BAFE8` (+ `*Muted` 12% tints for chip backgrounds)     |
-| Utility    | `highlightTop` (top-edge hairline) · `scrim` · `transparent`                                                              |
+| Group      | Tokens                                                                                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Background | `backgroundPrimary #F1F2F4` (the page) · `backgroundSecondary #F7F8F9` · `backgroundTertiary #EAEBEE`                                                    |
+| Surface    | `surfacePrimary #FFFFFF` (cards) · `surfaceSecondary #F5F6F8` (tiles inside cards) · `surfaceElevated #FFFFFF` · `surfacePressed #E9EAEE`                |
+| Ink        | `inkPrimary #121316` (primary button, selected filter) · `inkSecondary #2B2C31` (pressed)                                                                |
+| Inverse    | `surfaceInverse #17181B` (hero card, dock) · `surfaceInverseRaised #26272C` · `textOnInverse #F6F6F7` · `textOnInverseMuted #A9ABB3` · `borderOnInverse` |
+| Text       | `textPrimary #121316` · `textSecondary #565860` · `textTertiary #666870` · `textDisabled #A6A8B0` · `textInverse #FFFFFF`                                |
+| Border     | `borderSubtle` / `borderMedium` / `borderStrong` = ink at 6% / 10% / 18%                                                                                 |
+| Brand      | `brand #2E9B6A` · `brandStrong #167547` (text and fills that must reach AA) · `brandMuted` (12% tint) · `brandSoft #E4F3EB` (solid tint)                 |
+| Semantic   | `success #167547` · `warning #946000` · `danger #C0392B` · `info #2A5FC0` (+ `*Muted` 10% tints)                                                         |
+| Utility    | `highlightTop` · `scrim` · `shadowInk` · `transparent`                                                                                                   |
 
-`toneColors` maps a tone (`neutral | success | warning | danger | info`) to `{fg, bg, border}`. Semantic colours are for: available plot / confirmed / completed (success); follow-up due / on hold / attention (warning); overdue / blocked / error / destructive (danger); info only when genuinely useful.
+`toneColors` maps a tone (`neutral | brand | success | warning | danger | info`) to `{fg, bg, border}`.
 
 **Measured contrast (tested in `design-system.test.ts`, WCAG 2.x):**
 
-| Pair                                                         | Result                     |
-| ------------------------------------------------------------ | -------------------------- |
-| `textPrimary` on every background/surface                    | ≥ 7:1 (AAA)                |
-| `textSecondary` on every background/surface                  | ≥ 4.5:1 (AA)               |
-| `textInverse` on `whitePrimary` / `whiteSecondary` (buttons) | ≥ 7:1 (AAA)                |
-| `success` / `warning` / `danger` / `info` on page and cards  | ≥ 4.5:1 (AA)               |
-| **`textTertiary` on surfaces**                               | **3.49–4.17:1 — below AA** |
+| Pair                                                                        | Result          |
+| --------------------------------------------------------------------------- | --------------- |
+| `textPrimary` on every page and surface colour                              | ≥ 7:1 (AAA)     |
+| `textSecondary` and **`textTertiary`** on every page and surface            | ≥ 4.5:1 (AA)    |
+| White on `inkPrimary` / `inkSecondary` (buttons)                            | ≥ 7:1 (AAA)     |
+| `textOnInverse` / `textOnInverseMuted` on the charcoal surfaces             | ≥ 7:1 / ≥ 4.5:1 |
+| `brandStrong` on white, on the page, on `brandSoft`; white on `brandStrong` | ≥ 4.5:1         |
+| `success` `warning` `danger` `info` on page, cards and tiles                | ≥ 4.5:1 (AA)    |
 
-`#72726E` is the brief's value for tertiary text and it does not reach 4.5:1. The system therefore treats it as **non-essential only**: input placeholders, a decorative chevron, completed-task text (which is also struck through and ticked), zero counts. Timestamps, counts, hints and metadata use `textSecondary`. If you want tertiary usable for real information, lighten it: `#8A8A85` measures 4.86–5.81:1 on every surface (AA); this is flagged for your decision.
+The dark theme's tertiary-text exception is gone: `textTertiary` is now safe for meta and hints. `brand` (#2E9B6A) is for non-text marks (progress fill, dots, the V); anything that carries text uses `brandStrong`.
 
 ### Typography
 
-Inter, **three weights only** (Regular / Medium / SemiBold). There is no Bold, so "never more than three weights on a screen" holds by construction, and restraint is the default. Sizes carry the hierarchy; large sizes get slight negative tracking.
+Inter, **three weights only** (Regular / Medium / SemiBold — there is no Bold). Sizes carry the hierarchy; large sizes get slight negative tracking.
 
 | Token                            | Size / line                   | Weight                | Use                                                 |
 | -------------------------------- | ----------------------------- | --------------------- | --------------------------------------------------- |
-| `displayLarge` / `displayMedium` | 40/44 · 32/38                 | SemiBold              | Auth headlines                                      |
-| `headingXL` / `LG` / `MD` / `SM` | 26/32 · 22/28 · 18/24 · 16/22 | SemiBold              | Page titles, section titles, card titles            |
+| `displayLarge` / `displayMedium` | 40/44 · 32/38                 | SemiBold              | Landing and login headlines, big plot number        |
+| `headingXL` / `LG` / `MD` / `SM` | 26/32 · 22/28 · 18/24 · 16/22 | SemiBold              | Page titles, card titles                            |
 | `bodyLG` / `MD` / `SM`           | 16/24 · 14/20 · 13/18         | Regular               | Text                                                |
 | `labelLG` / `MD` / `SM`          | 14/18 · 12/16 · 11/14         | Medium                | Row titles, meta; `SM` is the uppercase micro-label |
-| `caption`                        | 11/15                         | Regular               | Timestamps                                          |
-| `metricXL` / `LG` / `MD`         | 36/40 · 28/32 · 20/24         | SemiBold, **tabular** | Prices, counts, times                               |
-| `tabLabel`, `buttonLG` / `MD`    | 11/14 · 16/20 · 14/18         | Medium / SemiBold     | Tab bar, buttons                                    |
+| `caption`                        | 11/15                         | Regular               | Timestamps, fine print                              |
+| `metricXL` / `LG` / `MD`         | 36/40 · 28/32 · 20/24         | SemiBold, **tabular** | Hero figure, prices, counts                         |
+| `tabLabel`, `buttonLG` / `MD`    | 11/14 · 16/20 · 14/18         | Medium / SemiBold     | Dock, buttons                                       |
 
-`AppText` is the only text component. It sets the style and colour from tokens, caps Dynamic Type at 1.3× so dense rows survive large text, and offers `uppercase` (micro-labels and status only — never paragraphs) and `header`.
+`AppText` is the only text component. Tones: `primary secondary tertiary disabled inverse onInverse onInverseMuted brand success warning danger info`. It caps Dynamic Type at 1.3×.
 
 ### Spacing, radius, elevation
 
-- **Spacing** is keyed by pixel value: `space[16]` = 16. Scale `2 4 6 8 12 16 20 24 32 40 48 64`. Page gutter **20**; section gap **32** (40 for large); min tap target **44**.
-- **Radius**: `xs 6 · sm 10 · md 14 · lg 18 · xl 24 · pill`. Controls stay tight (`sm`); larger radii only for major surfaces.
+- **Spacing** is keyed by pixel value: `space[16]` = 16. Scale `2 4 6 8 12 16 20 24 32 40 48 64`. Page gutter **20**; section gap **32**; min tap target **44**; dock **64** high, **12** above the bottom inset.
+- **Radius** (generous): `xs 8 · sm 12 · md 16 · lg 20 · xl 28 · pill`. Cards are `xl`, tiles and rows `lg`, fields `md`, buttons/chips/dock/avatars are pills.
+- **Elevation** = white + hairline + a soft, wide shadow ("floating paper"): `flat`, `tile` (no shadow), `raised` (cards), `elevated`, `overlay` (sheets, toasts), `inverse` (hero card, dock). Shadows are always ≤ 25% opacity and ≥ 16 blur — never a hard drop shadow; tested.
 - **Icons**: lucide only, 1.75 stroke, `iconSize` `sm 16 · md 18 · lg 20 · xl 22 · hero 28`. `Icon` is the only wrapper.
-- **Elevation** = tonal step + hairline border (+ top-edge highlight). `flat`, `raised`, `elevated`, and `overlay` — the **only** one allowed a shadow, and a soft one. Tested.
 
-### Deliberate departures from master spec §9
+### The icon vocabulary
 
-Your Stage 2 brief supersedes the Stage 1 values: new palette names/values, new type names (`headingXL`, `metricLG`, …) and sizes, radius `6/10/14/18/24`, spacing keyed by pixels (was index-keyed), and **Bold removed**. `space[5]` from Stage 1 is now `space[20]`. No compatibility aliases were kept — one system only.
+`icons.<meaning>` (`src/components/primitives/icons.ts`) is the only way a screen names an icon. Every meaning has exactly one glyph and no two meanings share one (tested): chrome (`home menu back forward close search filter notifications support profile settings signOut`), states (`check verified info warning alert show hide`), the seven sections (`projects booking calculator siteVisits teamSales addMember myTeam`), entry paths (`guest associate client`) and real-estate facts (`plot area price location visit phone mail`). Screens do not import lucide directly.
 
-## Surfaces and layout
+### Brand
+
+**Vara Real Estates.** `BrandMark` is a charcoal rounded tile with a "V" whose left stroke is light and right stroke is the brand green, drawn as vector (so it is crisp at every size). `Wordmark` sets the mark beside "Vara" and a small uppercase "Real Estates". The same artwork is rendered to the app icon, adaptive icon, splash and favicon in `assets/images/`.
+
+## Layout
 
 `ScreenLayout` is the template every screen uses:
 
 ```text
-SafeArea → Header → Scrollable content (20px gutter, 32px between sections) → Sticky action → (Tab bar)
+SafeArea → Header → Scrollable content (20px gutter, 24–32px between sections) → Sticky action → (Dock clearance)
 ```
 
-Content is capped at 640px and centred on wide viewports; the sticky action respects the bottom inset; the keyboard pushes content up. Tab screens use `edges=['top']` (the tab bar owns the bottom inset); pushed screens use `['top','bottom']`.
+Content is capped at 640px and centred on wide viewports; the sticky action sits on a white bar above the bottom inset; the keyboard pushes content up. `ScreenLayout` reads `useDockClearance()` so scrolling content always clears the floating dock.
 
-Prefer, in this order: **typography → spacing → hairline divider → tonal surface → bordered card.** `Section`, `MetricStrip` and `ListRow` exist so that pages read as lists and typography, not stacks of rectangles.
+Composition order on a screen: **header → title/intro → hero or summary card → supporting cards → list panel.** A `SummaryPanel` groups figures; a `NavPanel` groups destinations; both are white `xl` cards with hairlines between rows.
+
+## Navigation
+
+- **Floating dock** (`AssociateDock`): a charcoal pill with four icons — Home, Projects, Team, Profile. The selected item widens to show its label (a spring). It appears only on those four top-level routes (`dockKeyFor` in `features/navigation/dock.ts`, tested); pushed screens show a back button instead.
+- **Header** (`AppHeader`): a white round menu button, the screen name, and the profile avatar. The menu opens an action sheet (Profile, Settings, Prototype controls, Sign out).
+- **Pushed screens** use `DetailHeader`: a white round back button and a centred title (+ subtitle).
 
 ## Buttons
 
-One hierarchy per screen. `Button` (also `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `DangerButton`) and `IconButton`.
+One hierarchy per screen. `Button` (also `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `DangerButton`) and `IconButton`. All buttons are **pills**.
 
 | Variant   | Look                          | Use                                             |
 | --------- | ----------------------------- | ----------------------------------------------- |
-| Primary   | Solid white, dark label       | The single main action on a screen              |
-| Secondary | `surfaceElevated` + border    | Alternative actions                             |
+| Primary   | Ink fill, white label         | The single main action on a screen              |
+| Secondary | White fill, hairline border   | Alternative actions                             |
 | Tertiary  | No surface                    | Low-emphasis (Cancel, Open)                     |
 | Danger    | Red-tinted surface, red label | Destructive only — always behind a confirmation |
 
-Sizes `large 52` / `medium 44` / `small 36` (small still has a 44pt hit area). States: default, pressed (spring 0.98 + surface shift), **disabled** (an inert dark surface with disabled text — not a dimmed white slab), **loading** (spinner replaces the label but the label stays laid out, so the width never jumps; presses are blocked; `busy` is exposed). `IconButton` is 44×44 and **requires** an `accessibilityLabel`; a `badgeCount` is folded into its spoken name.
+Sizes `large 52` / `medium 44` / `small 36` (small still has a 44pt hit area). States: default, pressed (spring 0.98 + darken), **disabled** (a quiet grey pill with disabled text), **loading** (spinner replaces the label, width never jumps, presses blocked, `busy` exposed). `IconButton` is 44×44, requires an `accessibilityLabel`, and its `filled` variant is the white floating circle used for back and menu.
 
 ## Forms
 
-`TextField`, `SearchField`, `PhoneField`, `OTPField`, `TextArea`, `SelectField`, `DateField`, `TimeField` — all built on `FieldFrame` so states cannot drift apart.
-
-States: **idle · focused · filled · error · disabled.** 16px text (no iOS zoom), 52pt height, the whole surface focuses the input. **Errors are text with an icon**, announced as an alert — never only a red border. `PhoneField` keeps digits only (cap 10, shows +91). `OTPField` is six cells over one hidden input, so paste and SMS autofill work. `SelectField`, `DateField` and `TimeField` open a bottom sheet (dates come from the Clock, so demo mode offers "Today"). Forms are wired with React Hook Form + the shared Zod schemas (see `PhoneLoginForm`).
+`TextField`, `SearchField`, `PhoneField`, `OTPField`, `TextArea`, `SelectField`, `DateField`, `TimeField` — all on `FieldFrame`. Fields are **white with a hairline border**; focus turns the border **green**; error turns it red. States: idle · focused · filled · error · disabled. 16px text, 54pt tall, the whole surface focuses the input. **Errors are text with an icon**, announced as an alert. Forms use React Hook Form + Zod (`PhoneLoginForm`, `AddMemberScreen`, `BookingConfirmScreen`).
 
 ## Chips and status
 
-| Component                       | Purpose                                                             |
-| ------------------------------- | ------------------------------------------------------------------- |
-| `FilterChip`                    | Selectable filter; selected = solid white; optional count           |
-| `ChoiceChip`                    | Form choice; selection shown by border + tick + tonal lift          |
-| `StatusChip`                    | Non-interactive label; tone + optional icon                         |
-| `LeadPriorityChip`              | HOT is the only priority that draws colour (attention required)     |
-| `LeadStageChip`                 | Won ✓ / Lost ✗ carry a tone and icon; other stages are neutral text |
-| `PlotStatusBadge`, `PlotLegend` | All five plot statuses                                              |
+| Component                       | Purpose                                                     |
+| ------------------------------- | ----------------------------------------------------------- |
+| `FilterChip`                    | Selectable filter; selected = ink fill; optional count      |
+| `ChoiceChip`                    | Form choice; selected = green tint + green border + tick    |
+| `StatusChip`                    | Non-interactive label; tone (incl. `brand`) + optional icon |
+| `ChipRow`                       | Horizontal chip scroller that bleeds to the screen edges    |
+| `PlotStatusBadge`, `PlotLegend` | All five plot statuses                                      |
 
-**Status language (never colour alone):** Available = dot, On hold = clock, Booked = check, Blocked = lock, Not for sale = minus — each with its label. `plotStatusTokens` is typed `Record<PlotStatus, …>`, so adding a status without a token is a compile error. Urgency reads the same way: overdue says "Overdue" with an alert icon; due-today is amber with a clock (`utils/schedule.ts`).
+**Status language (never colour alone):** Available = dot, On hold = clock, Booked = check, Blocked = lock, Not for sale = minus — each with its label. `plotStatusTokens` is typed `Record<PlotStatus, …>`.
 
 ## Motion
 
-Reanimated 4. Tokens: `instant 80 · fast 140 · standard 220 · slow 320` ms; springs `press`, `sheet`, `settle` (near-critically damped — no bounce).
+Reanimated 4. Durations `instant 80 · fast 140 · standard 220 · slow 320` ms; springs `press`, `sheet`, `settle`; plus screen-level timings: `enterMs 420`, `staggerStep 45` (max 6 steps), `countUpMs 900`, `progressFillMs 1000`, `successRingMs 900` (tested to stay under 1.5 s and the stagger under 400 ms total).
 
-| Animated                            | How                                                                          |
-| ----------------------------------- | ---------------------------------------------------------------------------- |
-| Press (buttons, cards, chips, rows) | Spring scale (button .98, card .985, chip .96, icon .9) + surface change     |
-| Tab indicator                       | Fade + scale, 140ms                                                          |
-| Bottom sheet                        | Spring in (no bounce), slide out; scrim fades with the drag; drag-to-dismiss |
-| Toast                               | Fade + 16px rise, 220ms, auto-dismiss 2.8s                                   |
-| Toggle                              | Thumb slide, 140ms                                                           |
-| Skeleton                            | Slow opacity pulse                                                           |
+| Micro-interaction                    | How                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Press (buttons, cards, chips, tiles) | Spring scale (button .98, card .985, chip .96, icon .9) + surface change + optional haptic |
+| Screen sections and list rows        | `Reveal`: fade + 8px rise, staggered 45 ms per item (capped at 6)                          |
+| Headline figures                     | `AnimatedNumber` / `useCountUp`: ease-out count-up; screen readers get the final value     |
+| Progress bars                        | Fill animates to its value (1 s ease-out) with the knob riding the end                     |
+| Dock                                 | Selected item widens with a spring; label fades in                                         |
+| Login option cards                   | Green ring + check springs in when selected                                                |
+| Booking confirmation                 | `SuccessMark`: disc and check spring in, one ring expands and fades — plays once           |
+| Bottom sheet                         | Spring in (no bounce), slide out; scrim fades with the drag; drag-to-dismiss               |
+| Toast                                | Fade + 16px rise, 220 ms, auto-dismiss 2.8 s                                               |
+| Toggle                               | Thumb slide, 140 ms                                                                        |
+| Skeleton                             | Slow opacity pulse                                                                         |
 
-Not animated: list items on render, screen content, metrics. **Reduce Motion**: `useReducedMotion()` honours the OS setting unless `preferencesStore.reduceMotion` forces `on`/`off`; when reduced, scales are skipped, durations are 0, the sheet appears without movement and skeletons are static. State changes and haptics still happen.
+**Reduce Motion:** `useReducedMotion()` honours the OS setting unless Settings → Motion forces it on/off. When reduced: no scales, no rises, figures and bars are simply at their value, the dock and sheets change without movement. State changes and haptics still happen.
 
 ## Haptics
 
-Through `services/haptics` only (preference-aware, never throws). `light` — card/row/quick-action press, tab change; `selection` — chip, plot tile, toggle, picker choice; `medium` — task completed, destructive confirm; `success` — accepted OTP, success toast; `warning`/`error` — rejected input, error toast. Never continuous; never on scroll.
+Through `services/haptics` only (preference-aware, never throws). `light` — card/row/tile press; `selection` — chip, plot tile, dock item, radio card, toggle; `success` — accepted OTP, booking, member added; `warning`/`error` — rejected input. Never continuous; never on scroll.
 
 ## Accessibility
 
-- Every interactive element ≥ 44pt (`layout.minTapTarget`); smaller visuals get `hitSlop`.
-- Icon-only controls must be named (`IconButton` requires it). Cards expose one descriptive name ("Rahul Sharma. Hot priority. Visit. ₹40–55L. Next: …").
-- **No nested interactive elements.** `PressableCard` + `CardPressRegion` make the open-target a _sibling_ of Call / WhatsApp / Share buttons; a test asserts no `button` exists inside another. (This also removed invalid `<button>` nesting on web.)
-- Unread, selected, checked, busy, disabled and delivery state are exposed as accessibility state or spoken in the label — never a dot alone.
-- Errors and toasts are `alert` regions; empty/error copy is written for people.
-- Dynamic Type is allowed up to 1.3×; long names truncate with an ellipsis, large amounts shrink (`adjustsFontSizeToFit`) rather than overflow.
-- Contrast is measured (see Colour). `textTertiary` is the known exception.
+- Every interactive element ≥ 44pt; smaller visuals get `hitSlop`.
+- Icon-only controls are named (`IconButton` requires it). Cards expose one descriptive name; the dock is a `tablist` of `tab`s with selected state; login options are `radio`s; progress bars are `progressbar`s with min/max/now/text.
+- **No nested interactive elements** (`PressableCard` + `CardPressRegion`).
+- A pending figure is spoken as "My sales, pending, not yet added"; a masked figure as "hidden"; a count-up is never spoken mid-count.
+- Errors and toasts are `alert` regions; empty/error copy is written for people and never shows raw errors.
+- Dynamic Type up to 1.3×; long names truncate, large amounts shrink rather than overflow.
 
 ## Copy
 
-Concise and human. `Couldn't load your leads` (not `FETCH ERROR`); `No follow-ups scheduled` / `Nothing scheduled yet` (not `NO DATA`); `Visit marked complete.` (not `TRANSACTION SUCCESS`). Empty states say what is missing and what to do. Error states reassure ("Your prototype data is still safe.") and never show raw errors.
+Concise, human, second person. `Couldn't load your dashboard` (not `FETCH ERROR`); `No site visits yet` + what to do; `Plot booked` (not `TRANSACTION SUCCESS`). Anything simulated says so: _Prototype booking · no payment taken_.
 
 ## Usage rules
 
 1. Import tokens from `@/design-system` and components from `@/components`. Never hard-code a colour, radius, gap, padding, font size, shadow or duration.
-2. Text is `AppText`; press is `PressableScale` / `PressableCard`; icons are `Icon`; layout gaps are `Stack`/`Row` with a token `gap`.
-3. A screen has one Primary button. Destructive actions use `ConfirmationSheet`.
-4. Wrap repository data in `ResourceBoundary` so loading (skeleton), error (recoverable), empty and success are all handled.
-5. Format with `utils/format.ts` (₹, sq yd, dates relative to the Clock) — never inline. Dates come from the Clock via `useNow()`, never `new Date()`.
+2. Text is `AppText`; press is `PressableScale` / `PressableCard`; icons are `Icon` with `icons.<meaning>`; gaps are tokens.
+3. A screen has one Primary button and at most one charcoal card.
+4. Wrap repository data in `ResourceBoundary` so loading, error, empty and success are all handled.
+5. Format with `utils/format.ts` (₹, sq yd, dates relative to the Clock). Dates come from the Clock via `useNow()`, never `new Date()`.
 6. Screens and features never import raw RN `Text`/`Pressable`/`Switch`/`TextInput` (tested).
-7. New component? Add it to the gallery and a test first.
+7. New component? Add it to the gallery (`features/dev/sections/`) and a test first.
 
 ## Anti-patterns (reject in review)
 
-Card in card in card · a coloured panel or gradient · a status shown only by colour · a red border as the only error signal · a button inside a button · a lone full-screen spinner · more than one Primary · a shadow on a non-overlay · a one-off radius/spacing value · `textTertiary` for real information · uppercase paragraphs · animating every list item · a generic silhouette avatar · "No data found".
+A gradient or a second accent colour · green as a background wash · a status shown only by colour · a red border as the only error signal · a button inside a button · a lone full-screen spinner · more than one Primary · a hard shadow · a one-off radius/spacing value · a zero where the honest state is "pending" · animating every element (motion is for arrival, selection and confirmation) · a count-up that a screen reader reads aloud · "No data found".
 
 ## Component catalogue
 
-103 exports across the layers (see the gallery for each in every state):
-
-- **Primitives (18):** `AppText`, `Icon`, `IconContainer`, `Avatar`, `CountBadge`, `Surface`, `Stack`, `Row`, `Spacer`, `Divider`, `PressableScale`, `PressableCard`/`CardPressRegion`, `Toggle`, `ScreenContainer`, `SafeScreen`, `Section`, `SectionHeader`.
-- **Buttons (6):** `Button`, `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `DangerButton`, `IconButton`.
-- **Forms (9):** `TextField`, `SearchField`, `PhoneField`, `OTPField`, `TextArea`, `SelectField`, `DateField`, `TimeField`, `FieldFrame`.
-- **Chips (5):** `FilterChip`, `ChoiceChip`, `StatusChip`, `LeadStageChip`, `LeadPriorityChip`.
-- **Lists (7):** `ListRow`, `ActionRow`, `SettingRow`, `MetricRow`, `TimelineRow`, `ActivityRow`, `NotificationRow`.
-- **Feedback:** `Toast` (`ToastProvider`, `useToast`), `InlineError`, `EmptyState`, `LoadingState` + skeletons, `OfflineBanner`, `RepositoryErrorState`, `ConfirmationSheet`, `ActionSheet`, `BottomSheet`.
-- **Navigation:** `AppTabBar`, `StandardHeader`, `LargeTitleHeader`, `DetailHeader`, `SearchHeader`, `HomeHeader`.
+- **Primitives:** `AppText`, `Icon`, `icons`, `IconContainer`, `Avatar`, `BrandMark`/`Wordmark`, `CountBadge`, `Surface`, `Stack`, `Row`, `Spacer`, `Divider`, `PressableScale`, `PressableCard`/`CardPressRegion`, `Reveal`, `AnimatedNumber`, `Toggle`, `ScreenContainer`, `SafeScreen`, `Section`, `SectionHeader`.
+- **Blocks:** `HeroCard`/`HeroStat`, `SummaryPanel`/`StatGrid`/`StatTile`, `NavPanel`/`NavRow`, `ActionTile`/`ActionTileRow`, `LoginOptionCard`, `ProgressBar`.
+- **Buttons:** `Button` (+ presets), `IconButton`.
+- **Forms:** `TextField`, `SearchField`, `PhoneField`, `OTPField`, `TextArea`, `SelectField`, `DateField`, `TimeField`, `FieldFrame`.
+- **Chips:** `FilterChip`, `ChoiceChip`, `StatusChip`, `ChipRow`, `LeadStageChip`, `LeadPriorityChip`.
+- **Lists:** `ListRow`, `ActionRow`, `SettingRow`, `MetricRow`, `TimelineRow`, `ActivityRow`, `NotificationRow`.
+- **Feedback:** `ToastProvider`/`useToast`, `InlineError`, `EmptyState`, `LoadingState` + skeletons, `OfflineBanner`, `RepositoryErrorState`, `ConfirmationSheet`, `ActionSheet`, `BottomSheet`, `SuccessMark`.
+- **Navigation:** `AssociateDock`, `AppHeader`, `StandardHeader`, `LargeTitleHeader`, `DetailHeader`, `SearchHeader`, `HomeHeader`, `AppTabBar` (parked).
 - **Patterns:** `ScreenLayout`, `ResourceBoundary`.
-- **CRM:** `LeadCard`, `LeadStageIndicator`, `LeadSummary`, `NextActionCard`, `TaskCard`, `VisitCard`, `TimelineEventRow`, `ContactActionBar`.
-- **Property:** `ProjectCard`, `ProjectHero`, `ProjectImage` (monochrome site-plan artwork — no image files), `PropertyMetric`, `InventorySummary`, `PlotCard`, `PlotStatusBadge`, `PlotLegend`, `PropertyMatchCard`, `PriceSummary`.
-- **Communication:** `ConversationRow`, `MessageBubble`, `WhatsAppTemplateCard`, `QuickReplyChip`, `UnreadBadge`.
-- **Dashboard:** `MetricBlock`, `MetricStrip`, `SectionHeader`, `QuickAction`, `PipelineSummary`, `ProgressMeter`, `PerformanceSummary`, `AttentionBanner`.
+- **Property:** `ProjectCard`, `ProjectHero`, `ProjectImage` (site-plan artwork, no image files), `PropertyMetric`, `InventorySummary`, `PlotCard`, `PlotStatusBadge`, `PlotLegend`, `PropertyMatchCard`, `PriceSummary`.
+- **Team and sales:** `TeamMemberRow`, `SaleRow`. **Visits:** `VisitCard`, `VisitStatusChip`, `VisitHistoryRow`.
+- **Parked (CRM):** `LeadCard`, `LeadStageIndicator`, `LeadSummary`, `NextActionCard`, `TaskCard`, `TimelineEventRow`, `ContactActionBar`, conversation/message components, dashboard metrics.
 
-`PlaceholderScreen` (feedback) still backs routes whose real screens arrive later; it now sits on the real system and is deleted when the last placeholder route is replaced.
+`PlaceholderScreen` (feedback) is no longer used by any route; delete it when convenient.
 
 ## The gallery
 
-`/dev/design-system` renders everything above — typography, colour, spacing/radius/elevation, every button variant × size × state, every field state, chips, lists, CRM/property/communication/dashboard components (including a 52-character name, ₹8.5–32Cr budgets, ₹123Cr plots, sold-out projects, overdue/no-next-action leads), empty/error/offline/partial states, skeletons, sheets, toasts and headers — on data read through repositories. It is registered under `Stack.Protected guard={__DEV__}` and redirects home when `__DEV__` is false, so it is absent from production builds (a test asserts this; production bundles were built to confirm). Open it from Prototype controls, or go to `/dev/design-system` in the dev server.
+`/dev/design-system` renders every component in every state on data read through repositories, including a **Vara blocks** section (brand, the full icon set, hero card, summary tiles with a pending state, navigation rows, action tiles, header, dock, radio cards, progress bar, success mark, team/sale/visit rows). It is registered under `Stack.Protected guard={__DEV__}` and absent from production builds (tested). Open it from Settings → Prototype controls in a dev build, or go to `/dev/design-system`.
 
 ## Visual QA
 
-Review screenshots (browser renders at 390×844, 2×) are in [`docs/screenshots/`](screenshots): `home`, `leads`, `projects`, `tasks`, `inbox`, `login`, `bottom-sheet`, and the first two screens of the gallery (`gallery-1`, `gallery-2`).
-
-The UI was reviewed by rendering the real app through `react-native-web` in Chrome (390×844, 360×640/900, 412×915) and inspecting screenshots of every tab, login and the whole gallery. That process found and fixed: nested buttons, a wrapping time column, a heavy disabled-primary, a teal web switch, crisp-vs-dim completed ticks, dimmed display-only pipeline counts, artwork cropping, hyphen breaks in metric labels, and a browser focus ring inside inputs. It is **not** a substitute for a device run: fonts, haptics, safe areas, keyboard behaviour and gesture feel still need on-device verification.
+Screenshots of the flow (390×844 @2×, headless Chrome through `react-native-web`) are in [`docs/screenshots/`](screenshots), numbered in walk order: home, login, guest hub, dashboard (+ menu), projects, project, inventory, plot, live booking (+ confirm sheet, success), calculator, site visits, team sales, my team, profile, settings, prototype controls. The flow was walked end to end in the browser with zero console errors (see [QA_CHECKLIST.md](QA_CHECKLIST.md)). A device run is still outstanding: fonts, haptics, safe areas, keyboard behaviour and gesture feel need on-device verification.

@@ -64,7 +64,7 @@ export function NotificationRow({
                   width: 6,
                   height: 6,
                   borderRadius: radius.pill,
-                  backgroundColor: colors.whitePrimary,
+                  backgroundColor: colors.inkPrimary,
                 }}
               />
             ) : null}

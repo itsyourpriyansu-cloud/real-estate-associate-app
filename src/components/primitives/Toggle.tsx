@@ -14,7 +14,7 @@ const BORDER = 1;
 
 /**
  * Tokenised switch. Native switches differ per platform (and ignore our palette on web), so the
- * toggle is drawn once: a pill track that turns white when on, with a thumb that slides. The state
+ * toggle is drawn once: a pill track that turns green when on, with a white thumb that slides. The state
  * is exposed as a real `switch` with a checked value, and the hit area is 44pt tall.
  */
 export function Toggle({
@@ -59,9 +59,9 @@ export function Toggle({
           borderRadius: radius.pill,
           padding: INSET - BORDER,
           justifyContent: 'center',
-          backgroundColor: value ? colors.whitePrimary : colors.surfaceElevated,
+          backgroundColor: value ? colors.brandStrong : colors.backgroundTertiary,
           borderWidth: BORDER,
-          borderColor: value ? colors.whitePrimary : colors.borderMedium,
+          borderColor: value ? colors.brandStrong : colors.borderMedium,
         }}
       >
         <Animated.View
@@ -70,7 +70,7 @@ export function Toggle({
               width: THUMB,
               height: THUMB,
               borderRadius: radius.pill,
-              backgroundColor: value ? colors.backgroundPrimary : colors.textSecondary,
+              backgroundColor: colors.surfacePrimary,
             },
             thumbStyle,
           ]}

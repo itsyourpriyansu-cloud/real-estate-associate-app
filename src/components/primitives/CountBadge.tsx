@@ -7,7 +7,7 @@ import { AppText } from './AppText';
 const dimension = { sm: 16, md: 20 } as const;
 
 /**
- * The one count pill: white with dark digits, so it is the only bright mark on a row, icon or tab.
+ * The one count pill: a small red-toned circle with white digits, the only alert mark on an icon or row.
  * Used for unread counts (inbox, notifications, WhatsApp). Decorative — callers put the meaning in
  * their own accessibility label.
  */
@@ -25,7 +25,7 @@ export function CountBadge({
         height: dimension[size],
         paddingHorizontal: space[4],
         borderRadius: radius.pill,
-        backgroundColor: colors.whitePrimary,
+        backgroundColor: colors.danger,
         alignItems: 'center',
         justifyContent: 'center',
       }}

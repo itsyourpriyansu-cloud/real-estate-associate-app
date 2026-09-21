@@ -9,6 +9,7 @@ import { Icon } from '../../primitives/Icon';
 
 const toneIcon: Record<Exclude<Tone, 'success'>, LucideIcon> = {
   neutral: Info,
+  brand: Info,
   info: Info,
   warning: AlertTriangle,
   danger: CircleAlert,

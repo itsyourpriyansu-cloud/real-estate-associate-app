@@ -51,7 +51,7 @@ export function PipelineSummary({
                 key={stage}
                 style={{
                   flex: count,
-                  backgroundColor: colors.whitePrimary,
+                  backgroundColor: colors.inkPrimary,
                   opacity: 0.22 + (index / (PIPELINE.length - 1)) * 0.78,
                 }}
               />

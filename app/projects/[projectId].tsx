@@ -1,20 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { PlaceholderLink, PlaceholderScreen } from '@/components/feedback';
+import { ProjectDetailScreen } from '@/features/projects/ProjectDetailScreen';
 
-export default function ProjectDetailScreen() {
+export default function ProjectDetailRoute() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  return (
-    <PlaceholderScreen
-      back
-      title="Project detail"
-      route={`/projects/${projectId}`}
-      description="Hero, summary, highlights, amenities and inventory snapshot. Built in Stage B."
-    >
-      <PlaceholderLink
-        href={{ pathname: '/projects/[projectId]/inventory', params: { projectId } }}
-        label="View inventory"
-      />
-    </PlaceholderScreen>
-  );
+  return <ProjectDetailScreen projectId={projectId} />;
 }

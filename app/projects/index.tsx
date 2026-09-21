@@ -1,5 +1,6 @@
-import { ProjectsPreview } from '@/features/projects/ProjectsPreview';
+import { ProjectsScreen } from '@/features/projects/ProjectsScreen';
 
-export default function ProjectsScreen() {
-  return <ProjectsPreview />;
+/** 1 · OUR PROJECTS — shared by guest, client and associate. */
+export default function ProjectsRoute() {
+  return <ProjectsScreen />;
 }

@@ -1,16 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { PlaceholderScreen } from '@/components/feedback';
+import { BookingConfirmScreen } from '@/features/booking/BookingConfirmScreen';
 
 /** Live Booking confirm step for one plot. */
-export default function LiveBookingConfirmScreen() {
+export default function LiveBookingConfirmRoute() {
   const { plotId } = useLocalSearchParams<{ plotId: string }>();
-  return (
-    <PlaceholderScreen
-      back
-      title="Confirm booking"
-      route={`/live-booking/${plotId}`}
-      description="Customer details, cost preview and confirmation; writes a Sale via SalesRepository.createBooking. Built in Stage F."
-    />
-  );
+  return <BookingConfirmScreen plotId={plotId} />;
 }

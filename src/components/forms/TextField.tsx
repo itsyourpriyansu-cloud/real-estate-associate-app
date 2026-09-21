@@ -73,8 +73,8 @@ export function TextField({
           accessibilityLabel={accessibilityLabel ?? label}
           accessibilityState={{ disabled: !!disabled }}
           placeholderTextColor={colors.textTertiary}
-          selectionColor={colors.whitePrimary}
-          cursorColor={colors.whitePrimary}
+          selectionColor={colors.brand}
+          cursorColor={colors.brandStrong}
           onFocus={(event) => {
             setFocused(true);
             onFocus?.(event);
@@ -90,6 +90,7 @@ export function TextField({
               color: colors.textPrimary,
               paddingVertical: 0,
               outlineWidth: 0,
+              outlineColor: colors.transparent,
               minHeight: 24,
             },
             multiline ? { textAlignVertical: 'top', minHeight: 72 } : null,

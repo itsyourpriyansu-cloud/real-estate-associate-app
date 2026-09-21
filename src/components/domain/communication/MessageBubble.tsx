@@ -76,7 +76,7 @@ export function MessageBubble({ message }: { message: Message }) {
             <Icon
               icon={message.status === 'SENT' ? Check : CheckCheck}
               size="sm"
-              color={message.status === 'READ' ? colors.whitePrimary : colors.textTertiary}
+              color={message.status === 'READ' ? colors.inkPrimary : colors.textTertiary}
             />
           ) : null}
         </View>

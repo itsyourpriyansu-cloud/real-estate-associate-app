@@ -9,7 +9,7 @@ Run everything: `npm run validate` (typecheck + lint + tests), then `npm run doc
 - [x] **TypeScript strict** — `npm run typecheck`, typed routes active.
 - [x] **ESLint** — `--max-warnings=0` (includes the React-Compiler rules from `eslint-config-expo`).
 - [x] **Prettier** — `npm run format:check`.
-- [x] **Jest** — 387 tests, 11 suites (architecture · session guard matrix · flow: team/sales/summary/pricing · components · design-system · format/selectors · previews · repositories · seed · services · stores).
+- [x] **Jest** — 449 tests, 13 suites (screens · Vara components · architecture · session guard matrix · flow: team/sales/summary/pricing · components · design-system · format/selectors · previews · repositories · seed · services · stores).
 - [x] **Expo Doctor** — 21/21; `expo install --check` clean.
 - [x] **Production bundles** — Android + iOS (Hermes), `__DEV__` false; only three Inter files ship.
 - [ ] **Android build launches on a device/emulator** — _not verified._
@@ -89,3 +89,15 @@ Answered from the rendered screenshots (a designer's eye, not a metric):
 - [x] **Browser walk (Chrome 390x844, `expo start --web`)** — Home to Guest / Associate / Simple login; OTP; Dashboard to all 7 sections plus Profile and Settings and back; sign out; client deep link `/dashboard` lands on the guest hub; a guest session survives a reload; **0 console errors**.
 - [x] **Production bundle** — `expo export --platform android` succeeds with the new tree.
 - [ ] **Not verified:** a device/emulator run, Expo Doctor after the restructure, an iOS bundle.
+
+## Vara light theme, brand and screens
+
+- [x] **Contrast** — the light palette is measured in `design-system.test.ts`: primary text AAA, secondary and tertiary text AA on every page and surface, white on ink AAA, charcoal-surface text AAA/AA, `brandStrong` and every semantic colour AA on page, cards and tiles.
+- [x] **Shadows** — soft and wide only (≤ 25% opacity, ≥ 16 blur); flat surfaces and tiles have none.
+- [x] **Icon vocabulary** — one glyph per meaning, no shared glyphs (`vara-components.test.tsx`).
+- [x] **Motion** — `Reveal`, count-up, progress, dock spring, radio check, success mark: all instant with Reduce Motion (tested), all tokenised (architecture test forbids literal durations).
+- [x] **Screens over the real repositories** (`screens.test.tsx`) — Home (numbers, radio cards, offline), guest hub, dashboard (numbers, mask, **pending** in Empty CRM, menu, error → recovery), projects filter, team (levels, validation, duplicate phone, add), team sales (progress bars), visits filter, calculator (total, digits only), booking (validation → confirm → success; a booked plot is refused).
+- [x] **Dock** — four tabs in order, one selected, shown only on the four top-level routes.
+- [x] **Browser walk (Chrome 390×844)** — guest path; associate login; hide figures; menu sheet; all seven sections and back; dock; calculator; **live booking → success → the sale appears in Team Sales**; **add member → appears in My Team (10 members)**; sign out. **0 console errors.** Screenshots in `docs/screenshots/`.
+- [x] **Brand** — "Vara Real Estates" in the app name, wordmark and icons; app icon, adaptive icon, splash and favicon regenerated from the vector mark.
+- [ ] **Not verified:** a device/emulator run (haptics, fonts on device, keyboard, safe areas), Expo Doctor and an iOS bundle after the redesign, a screen-reader pass.

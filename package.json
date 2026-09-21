@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase 1 frontend prototype of a real-estate associate sales operating system (deterministic seed data, no backend).",
+  "description": "Vara Real Estates: Phase 1 frontend prototype of the associate app (deterministic seed data, no backend).",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

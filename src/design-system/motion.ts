@@ -37,6 +37,18 @@ export const motion = {
   /** Toast / sheet entry offset. */
   toastTranslate: 16,
   metricTranslate: 6,
+  /** Delay between siblings in a staggered entrance. */
+  staggerStep: 45,
+  /** Longest a list is staggered, so long lists never feel slow. */
+  staggerMax: 6,
+  /** Count-up of headline figures. */
+  countUpMs: 900,
+  /** Progress bar fill. */
+  progressFillMs: 1000,
+  /** The single expanding ring on a success mark. */
+  successRingMs: 900,
+  /** Entrance of a whole screen section. */
+  enterMs: 420,
 } as const;
 
 export const opacity = {

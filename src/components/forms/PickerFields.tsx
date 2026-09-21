@@ -85,7 +85,7 @@ export function SelectField<T extends string>({
                 subtitle={option.description}
                 trailing={
                   option.value === value ? (
-                    <Icon icon={Check} size="lg" color={colors.whitePrimary} />
+                    <Icon icon={Check} size="lg" color={colors.inkPrimary} />
                   ) : undefined
                 }
                 accessibilityLabel={

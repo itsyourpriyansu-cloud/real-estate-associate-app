@@ -122,8 +122,8 @@ export function TaskCard({
             height: 26,
             borderRadius: radius.pill,
             borderWidth: 1.5,
-            borderColor: done ? colors.whitePrimary : colors.borderStrong,
-            backgroundColor: done ? colors.whitePrimary : colors.transparent,
+            borderColor: done ? colors.inkPrimary : colors.borderStrong,
+            backgroundColor: done ? colors.inkPrimary : colors.transparent,
             alignItems: 'center',
             justifyContent: 'center',
           }}

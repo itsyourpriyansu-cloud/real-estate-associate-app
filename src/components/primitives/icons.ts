@@ -16,9 +16,9 @@ import {
   Grid2x2,
   Headset,
   House,
+  Images,
   IndianRupee,
   Info,
-  KeyRound,
   LogOut,
   Mail,
   MapPin,
@@ -80,7 +80,6 @@ export const icons = {
   // entry paths
   guest: Compass,
   associate: Briefcase,
-  client: KeyRound,
 
   // real-estate facts
   plot: Grid2x2,
@@ -90,6 +89,7 @@ export const icons = {
   visit: CalendarCheck,
   phone: Phone,
   mail: Mail,
+  gallery: Images,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;

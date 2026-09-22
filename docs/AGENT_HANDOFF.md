@@ -12,7 +12,7 @@ Start here: [README.md](../README.md) → [RUN_THE_PROTOTYPE.md](RUN_THE_PROTOTY
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | TypeScript strict (typed routes regenerated)      | pass                                                                                                         |
 | ESLint `--max-warnings=0`                         | pass                                                                                                         |
-| Jest                                              | 449 tests / 13 suites pass                                                                                   |
+| Jest                                              | 450 tests / 13 suites pass                                                                                   |
 | Android production bundle                         | pass (`expo export`, re-run after the redesign)                                                              |
 | Browser walk, Chrome 390×844 (`expo start --web`) | pass, **0 console errors** (guest path, login, dashboard, all seven sections, booking, add member, sign out) |
 | Expo Doctor / iOS bundle after the redesign       | not re-run                                                                                                   |
@@ -20,12 +20,19 @@ Start here: [README.md](../README.md) → [RUN_THE_PROTOTYPE.md](RUN_THE_PROTOTY
 
 ### What exists
 
-- **Flow** — public Home (numbers + three radio cards + Login) → Guest / Associate / Simple login (phone + OTP) → guest hub → Our Projects (list, project, inventory, plot) **or** the associate dashboard: hero card, performance panel with **Pending** states, seven section rows, and a floating dock (Home · Projects · Team · Profile). Sections: Our Projects, **Live Booking** (pick plot → customer → confirm → success), **Price Calculator**, **Site Visits History** (+ detail), **Team Sales** (month vs target, top sellers, sales), **Add Team Member**, **My Team** (+ member detail). Also Profile, Settings, Prototype controls. Route/screen map: [SCREEN_MAP.md](SCREEN_MAP.md).
+- **Flow** — public Home (numbers + two radio cards + Login) → Guest **or** Associate (phone + OTP) → guest hub → Our Projects (list, project, inventory, gallery, plot) **or** the associate dashboard: hero card, performance panel with **Pending** states, seven section rows, and a floating dock (Home · Projects · Team · Profile). Sections: Our Projects, **Live Booking** (pick plot → customer → confirm → success), **Price Calculator**, **Site Visits History** (+ detail), **Team Sales** (month vs target, top sellers, sales), **Add Team Member**, **My Team** (+ member detail). Also Profile, Settings, Prototype controls. Route/screen map: [SCREEN_MAP.md](SCREEN_MAP.md).
 - **Design system** — light theme with a green accent, ink actions, a charcoal hero card and dock, generous radii, soft shadows, tokenised motion, an icon vocabulary and the Vara brand mark. Full reference: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
-- **Data layer** (from the previous pass) — session kinds (`none|guest|client|associate`), 11 repository contracts with mocks, seed v2 (19 users, 20 sales, targets, project statuses). Booking a plot flips it to `BOOKED`, adds a `Sale`, and the plot, project counts, summaries and sales lists all follow (tested).
+- **Data layer** — session kinds (`none|guest|associate`), 11 repository contracts with mocks, seed v2 (18 users, 20 sales, targets, project statuses). Booking a plot flips it to `BOOKED`, adds a `Sale`, and the plot, project counts, summaries and sales lists all follow (tested).
 - **CRM parked** — Leads, Tasks, Inbox, notifications, search and their route files were removed from `app/`; the features, components, repositories and tests remain (they navigate through `utils/parkedRoutes.ts`).
 
 ### What changed in this pass
+
+1. **Simple Login (client) removed.** Home now offers **Guest** or **Associate** only. `LoginScreen`/`PhoneLoginForm` dropped their `as`/`LoginAs` parameter — there is one login. `AuthService` dropped `accountKind`/`WRONG_ROLE` (nothing to be "wrong" against with one login). `Session.kind` and `User.role` dropped `client`/`CLIENT`; the seeded client user (`Suresh Nair`) is gone, so seed users went from 19 → 18.
+2. **Project photo gallery.** `Project` gained `galleryImages: string[]` (domain schema). `ProjectCard` gained a "View Gallery" action under "View inventory" (both guest and associate, since the card is shared) → new route `app/projects/[projectId]/gallery.tsx` / `ProjectGalleryScreen`, registered in the root layout's shared group.
+3. **Projects renamed, one brand.** The four demo projects are now **Sunrise Meadows / Emerald Hills / Silver Creek / Maple Ridge**, all developed by **Vara Real Estates** itself rather than four invented competing developer companies. Hero/thumbnail/gallery images switched from the drawn `placeholder://` site-plan artwork to real stock photography (`picsum.photos`, seeded per project so it never changes). See ARCHITECTURE.md deviation 28 for the full rationale, including why the parked CRM's lead/task copy (unrouted, invisible) still says "Real Rise" as literal text.
+4. **Docs** — SCREEN_MAP, ARCHITECTURE (deviation 28), DOMAIN_SCHEMA, QA_CHECKLIST updated for the above.
+
+### What changed in the previous pass
 
 1. **Tokens** — `colors` rewritten (light palette + ink/inverse/brand groups; `whitePrimary`/`whiteSecondary` → `inkPrimary`/`inkSecondary`), `radius` `8/12/16/20/28`, `elevation` gained `tile` and `inverse` and soft shadows on cards, `motion` gained `enterMs`, `staggerStep`, `countUpMs`, `progressFillMs`, `successRingMs`; `layout` gained `dockHeight`/`dockOffset`. `Tone` gained `brand`.
 2. **Components** — new: `BrandMark`/`Wordmark`, `icons`, `Reveal`, `AnimatedNumber` (+ `useCountUp`), blocks (`HeroCard`, `SummaryPanel`/`StatTile`, `NavPanel`/`NavRow`, `ActionTile`, `LoginOptionCard`, `ProgressBar`), `AssociateDock` + `DockContext`, `AppHeader`, `ChipRow`, `SuccessMark`, `TeamMemberRow`, `SaleRow`, `VisitHistoryRow`. Restyled: buttons (pills), fields (white, green focus), chips, toggle (green), avatar, count badge, plot/project cards, headers.
@@ -41,11 +48,12 @@ Start here: [README.md](../README.md) → [RUN_THE_PROTOTYPE.md](RUN_THE_PROTOTY
 - `MockUserRepository.getCurrent()` returns **the first ASSOCIATE** in the seed whichever associate number signed in (an API resolves it from the token). Signing in with the team lead's number still shows Raghunath's data.
 - **Sales units.** The wireframe is ambiguous ("Team Total Sales" equals registered sq. yards). The dashboard headlines the registered **sq. yards** and shows team and personal sales as **₹ value** with plots and sq. yards as captions.
 - **Team site visits** counts the associate's own visits (visits are lead-bound); a per-member visit history is not modelled.
-- **Auth is phone + OTP** (a product decision), not the wireframe's User ID + Password; a known number on the wrong login is refused, unknown numbers are accepted for either.
+- **Auth is phone + OTP** (a product decision), not the wireframe's User ID + Password. There is now one login (Associate); any valid 10-digit number is accepted.
 - `SuccessMark`, `ProgressBar` and the dock spring were reviewed in a browser, not on a device; tune springs on hardware.
 - The Android adaptive-icon foreground and monochrome layers are the bare "V" (safe-zone sized); check them against a launcher mask.
 - `PlaceholderScreen`, `AppTabBar`, `HomeHeader` and the CRM components are still exported (parked); delete what you do not re-attach.
-- Project imagery is the generated site-plan artwork (no photos). Notifications, search and WhatsApp are out of this flow.
+- Project imagery is seeded stock photography (`picsum.photos`), not real project photos. Notifications, search and WhatsApp are out of this flow.
+- The parked CRM's lead/task copy still names the pre-rename project ("Follow up on Real Rise shortlist"); it is unrouted and invisible, so it was left as-is when the projects were renamed (ARCHITECTURE.md deviation 28).
 
 ## Component ownership
 
@@ -77,7 +85,7 @@ Rule: a component has exactly one owner. To change another owner's component, ex
 2. **Expo Doctor and both production bundles** after the redesign.
 3. **Screen-reader pass** (TalkBack / VoiceOver): dock as tabs, radio cards, progress bars, pending tiles, sheets.
 4. **Decisions to confirm** (below), then polish copy.
-5. **Optional:** dark theme as a second palette (the token layer is centralised; the components read tokens only), real project photography, per-member visit history, re-attach the CRM, replace the mocks with FastAPI repositories (the contracts are the seam).
+5. **Optional:** dark theme as a second palette (the token layer is centralised; the components read tokens only), real project photography (stock photos are a placeholder, not final imagery), per-member visit history, re-attach the CRM, replace the mocks with FastAPI repositories (the contracts are the seam).
 
 ## Open questions for the reviewer
 
@@ -95,3 +103,4 @@ Rule: a component has exactly one owner. To change another owner's component, ex
 | 2026-09-19 | Stage 2 (all roles) → reviewer | New tokens; 103 components; custom tab bar + headers; auth UI; 5 representative compositions; dev gallery; 338 tests.                                                                                                                                      |
 | 2026-09-21 | Flow restructure → reviewer    | Rebuilt routes/session/guards around the app-flow wireframe; CRM parked; +3 repository contracts, Sale/Team/Summary/pricing domain, seed v2; 387 tests.                                                                                                    |
 | 2026-09-21 | Vara redesign → reviewer       | Light theme + green accent, brand, icon vocabulary, floating dock, hero card, motion set; every flow screen built (Home → dashboard → seven sections, booking, team); 449 tests; browser walk clean; RUN_THE_PROTOTYPE.md; docs and screenshots refreshed. |
+| 2026-09-22 | Simple Login removal + project gallery → reviewer | Removed Simple Login (client) end to end (Home, routes, `AuthService`, `authStore`, `sessionAccess`, `User.role`, seed); added `Project.galleryImages` + "View Gallery" action + `/projects/[projectId]/gallery`; renamed the four projects to Sunrise Meadows / Emerald Hills / Silver Creek / Maple Ridge, all under one brand (Vara Real Estates) instead of four invented developers; swapped drawn placeholder project art for seeded stock photography. ARCHITECTURE.md deviation 28; SCREEN_MAP/DOMAIN_SCHEMA/QA_CHECKLIST updated; tests updated and extended. |

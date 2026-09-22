@@ -21,6 +21,8 @@ export const projectSchema = z
      */
     heroImageUrl: z.string().min(1),
     thumbnailUrl: z.string().min(1),
+    /** Photo gallery for the project (Stage 9). Same reference rules as `heroImageUrl`. */
+    galleryImages: z.array(z.string().min(1)).min(1),
     startingPrice: inrAmountSchema,
     maxPrice: inrAmountSchema.optional(),
     minPlotAreaSqYd: z.number().positive(),

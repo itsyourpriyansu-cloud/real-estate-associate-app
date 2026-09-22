@@ -22,7 +22,7 @@ import { groupIndian } from '@/utils/format';
 
 import { usePublicSummary } from './usePublicSummary';
 
-type Entry = 'guest' | 'associate' | 'client';
+type Entry = 'guest' | 'associate';
 
 const ENTRIES: {
   key: Entry;
@@ -42,18 +42,11 @@ const ENTRIES: {
     description: 'Your dashboard, team, bookings and site visits.',
     icon: icons.associate,
   },
-  {
-    key: 'client',
-    title: 'Simple login',
-    description: 'Sign in to view projects, plots and prices.',
-    icon: icons.client,
-  },
 ];
 
 const CTA: Record<Entry, string> = {
   guest: 'Continue as guest',
   associate: 'Login',
-  client: 'Login',
 };
 
 const count = (value: number | undefined) => (value === undefined ? '–' : String(value));
@@ -67,7 +60,7 @@ export function PublicHome() {
 
   const proceed = () => {
     if (entry === 'guest') continueAsGuest();
-    else router.push(entry === 'associate' ? '/associate-login' : '/simple-login');
+    else router.push('/associate-login');
   };
 
   return (

@@ -28,9 +28,9 @@ const FILTERS: Filter[] = ['ALL', 'ONGOING', 'COMPLETED'];
 const label = (filter: Filter) => (filter === 'ALL' ? 'All' : PROJECT_STATUS_LABEL[filter]);
 
 /**
- * 1 · OUR PROJECTS — shared by guest, client and associate. Associates land here from the dock
- * (a top-level screen with a large title); guests and clients arrive from the guest hub and get a
- * back button. Filter by status; every card opens the project or its inventory.
+ * 1 · OUR PROJECTS — shared by guest and associate. Associates land here from the dock (a
+ * top-level screen with a large title); guests arrive from the guest hub and get a back button.
+ * Filter by status; every card opens the project, its inventory, or its photo gallery.
  */
 export function ProjectsScreen() {
   const router = useRouter();
@@ -101,6 +101,12 @@ export function ProjectsScreen() {
                   onViewInventory={() =>
                     router.push({
                       pathname: '/projects/[projectId]/inventory',
+                      params: { projectId: project.id },
+                    })
+                  }
+                  onViewGallery={() =>
+                    router.push({
+                      pathname: '/projects/[projectId]/gallery',
                       params: { projectId: project.id },
                     })
                   }

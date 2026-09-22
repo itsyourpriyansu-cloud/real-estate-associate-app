@@ -54,10 +54,10 @@ export function downlineOf(data: PrototypeDataset, rootId: string): DownlineEntr
   return result;
 }
 
-/** Sales-role users on one team (clients have no team). */
+/** Sales-role users on one team. */
 export function teamUsers(data: PrototypeDataset, teamName: string | undefined): User[] {
   if (!teamName) return [];
-  return data.users.filter((u) => u.role !== 'CLIENT' && u.teamName === teamName);
+  return data.users.filter((u) => u.teamName === teamName);
 }
 
 export function requireLead(data: PrototypeDataset, leadId: string): Lead {

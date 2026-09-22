@@ -6,7 +6,7 @@ A light, soft, premium mobile app for Vara's real-estate associates: browse proj
 
 **Start here → [docs/RUN_THE_PROTOTYPE.md](docs/RUN_THE_PROTOTYPE.md)** (how to run it, sign in, walk the flow and see every state).
 
-**Status:** the whole flow is built and working on seed data: public **Home** → **Guest / Associate / Simple** login → **Our Projects** (project, inventory, plot) or the **Associate Dashboard** with its seven sections (Our Projects, Live Booking, Price Calculator, Site Visits History, Team Sales, Add Team Member, My Team), Profile, Settings and Prototype controls. The design system was rebuilt as a light theme with a green accent, a floating dock, a charcoal hero card and considered micro-interactions — see [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Route map: [docs/SCREEN_MAP.md](docs/SCREEN_MAP.md). Current state and next steps: [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md). The original CRM (Leads, Tasks, Inbox) is parked, not deleted.
+**Status:** the whole flow is built and working on seed data: public **Home** → **Guest** or **Associate** login → **Our Projects** (project, inventory, gallery, plot) or the **Associate Dashboard** with its seven sections (Our Projects, Live Booking, Price Calculator, Site Visits History, Team Sales, Add Team Member, My Team), Profile, Settings and Prototype controls. The design system was rebuilt as a light theme with a green accent, a floating dock, a charcoal hero card and considered micro-interactions — see [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Route map: [docs/SCREEN_MAP.md](docs/SCREEN_MAP.md). Current state and next steps: [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md). The original CRM (Leads, Tasks, Inbox) is parked, not deleted.
 
 ## Stack
 
@@ -47,7 +47,6 @@ npm run format       # Prettier
 |                     |                |
 | ------------------- | -------------- |
 | **Associate**       | `9876543210`   |
-| **Simple (client)** | `9876500100`   |
 | **Guest**           | no credentials |
 | **OTP**             | `123456`       |
 
@@ -115,12 +114,12 @@ __tests__/           Jest suites
 
 ## Known limitations
 
-- **Most routes are still placeholders.** The app was restructured around the "Android APP Flow" wireframe: public Home, then Guest / Associate / Simple login, then Our Projects or the associate dashboard with its seven sections. The route tree, session guards, domain and repository contracts are in place; Home, the dashboard and the seven sections are placeholders until Stages A–F (docs/AGENT_HANDOFF.md). Login and OTP are real; `/projects` renders the Stage 2 preview. The CRM shell (Leads, Tasks, Inbox) is parked: code kept, routes removed.
+- **This section predates the completed flow** (see the Status line above and docs/AGENT_HANDOFF.md for current state). The app is restructured around the "Android APP Flow" wireframe: public Home, then Guest or Associate login, then Our Projects or the associate dashboard with its seven sections. The CRM shell (Leads, Tasks, Inbox) is parked: code kept, routes removed.
 - **Not yet run on a device or emulator.** Stages 1–2 and the flow restructure were verified by typecheck, lint, 387 tests, Expo Doctor, production Metro bundles for Android and iOS, and a browser render of every tab and the full gallery — not by launching on hardware. Fonts, haptics, safe areas, keyboard behaviour and gesture feel remain unverified; the first on-device run is the first task of the next stage.
 - **App icon and splash** are the Expo template's placeholder images; brand assets are not part of Phase 1.
 - **Tertiary text contrast** (#72726E from the design brief) is below WCAG AA; it is restricted to non-essential text. See docs/DESIGN_SYSTEM.md.
 - **Call / WhatsApp / Add lead** actions on the previews show an honest "arrives in a later stage" toast.
-- **Project images** use `placeholder://` keys (see [docs/DOMAIN_SCHEMA.md](docs/DOMAIN_SCHEMA.md)); the image resolver and monochrome placeholders arrive in Stage 5.
+- **Project images** are seeded stock photography (`picsum.photos`), not real project photos (see [docs/DOMAIN_SCHEMA.md](docs/DOMAIN_SCHEMA.md)); a `placeholder://` key still renders a drawn site-plan fallback where used.
 - **WhatsApp** is not integrated; Stage 6 adds prefilled deep links and a seeded, clearly-labelled prototype inbox.
 - **No real OTP, backend, payments, notifications infrastructure or AI.** All out of scope for Phase 1.
 - **Seed phone numbers** are synthetic sequential values (`+91 90000 000NN`). A WhatsApp deep link to one could reach a real person's number, so Stage 6 must always prefill text and never auto-send.

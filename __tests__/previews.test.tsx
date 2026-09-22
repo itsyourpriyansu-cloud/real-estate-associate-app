@@ -159,11 +159,11 @@ describe('Projects preview', () => {
   it('shows the four projects and an inventory sample with every status spelled out', async () => {
     await show(<ProjectsPreview />);
     expect(await screen.findByText('4 projects · 74 plots available')).toBeTruthy();
-    for (const name of ['Real Rise', 'Aurelia Greens', 'Northgate County', 'Cedar Enclave']) {
+    for (const name of ['Sunrise Meadows', 'Emerald Hills', 'Silver Creek', 'Maple Ridge']) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
     }
     expect(screen.getByText('21 available')).toBeTruthy();
-    expect(screen.getByText('Inventory · Real Rise')).toBeTruthy();
+    expect(screen.getByText('Inventory · Sunrise Meadows')).toBeTruthy();
     expect(screen.getAllByText('Not for sale').length).toBeGreaterThan(0); // summary legend
     expect(screen.getAllByRole('button', { name: 'View inventory' })).toHaveLength(4);
   });
@@ -174,6 +174,17 @@ describe('Projects preview', () => {
     await fireEvent.press(screen.getAllByRole('button', { name: 'View inventory' })[0] as never);
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/projects/[projectId]/inventory',
+      params: { projectId: 'prj_real_rise' },
+    });
+  });
+
+  it('routes to a project’s gallery', async () => {
+    await show(<ProjectsPreview />);
+    await screen.findByText('4 projects · 74 plots available');
+    expect(screen.getAllByRole('button', { name: 'View Gallery' })).toHaveLength(4);
+    await fireEvent.press(screen.getAllByRole('button', { name: 'View Gallery' })[0] as never);
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: '/projects/[projectId]/gallery',
       params: { projectId: 'prj_real_rise' },
     });
   });

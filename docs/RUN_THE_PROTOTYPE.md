@@ -26,20 +26,19 @@ If something looks stale, restart with a clean cache: `npx expo start -c`.
 
 ## 2. Sign in
 
-There are three ways in. Nothing is real: any valid mobile number is accepted, and the code is always **123456**.
+There are two ways in. Nothing is real: any valid mobile number is accepted, and the code is always **123456**.
 
 | Home card        | What you get                                                    | Demo number                          |
 | ---------------- | --------------------------------------------------------------- | ------------------------------------ |
 | **Guest**        | Browse Our Projects. No sign-in.                                | —                                    |
 | **Associate**    | The dashboard, team, bookings, sales, visits (dock navigation). | `9876543210` (K. V. Raghunath Reddy) |
-| **Simple login** | A client: Our Projects only.                                    | `9876500100`                         |
 
-Tap **Use demo number** on the login screen to fill it in. Try the guard: the client number on _Associate_ login (and the associate number on _Simple_ login) is refused with a clear message.
+Tap **Use demo number** on the login screen to fill it in.
 
 ## 3. A ten-minute walkthrough
 
 1. **Home.** The dark card counts up to the total registered sq. yards; the three stats under it are completed / ongoing projects and available plots. Tap the three cards — the check springs in and the button changes (_Continue as guest_ / _Login_).
-2. **Guest → Our Projects.** Filter Ongoing / Completed (counts on the chips). Open a project → **View inventory** → tap a plot. As a guest you see facts and a cost preview but no booking button.
+2. **Guest → Our Projects.** Filter Ongoing / Completed (counts on the chips). Open a project → **View inventory** → tap a plot. As a guest you see facts and a cost preview but no booking button. Each card also has **View Gallery**, below View inventory, for the project's photos.
 3. **Back, then Associate login → OTP → Dashboard.** Watch the sections rise in one after another. Tap the **eye** on the dark card to mask the figures (it is remembered).
 4. **The dock** (bottom): Home · Projects · Team · Profile. The selected item widens and shows its label. It disappears on pushed screens, which have a back button instead.
 5. **Menu** (top-left round button): Profile, Settings, Prototype controls, Sign out.

@@ -2,13 +2,12 @@ import { PROTOTYPE_ACCOUNTS } from '@/constants/prototype';
 import { accessFor, landingFor, type SessionAccess } from '@/features/auth/sessionAccess';
 import type { SessionKind } from '@/store/authStore';
 
-const kinds: SessionKind[] = ['none', 'guest', 'client', 'associate'];
+const kinds: SessionKind[] = ['none', 'guest', 'associate'];
 
 describe('session → route group access (guard matrix)', () => {
   const expected: Record<SessionKind, (keyof SessionAccess)[]> = {
     none: ['public'],
     guest: ['guest', 'shared'],
-    client: ['guest', 'shared'],
     associate: ['associate', 'shared'],
   };
 
@@ -18,9 +17,8 @@ describe('session → route group access (guard matrix)', () => {
     expect(allowed.sort()).toEqual([...expected[kind]].sort());
   });
 
-  it('never lets a guest or client reach the associate dashboard', () => {
+  it('never lets a guest reach the associate dashboard', () => {
     expect(accessFor('guest').associate).toBe(false);
-    expect(accessFor('client').associate).toBe(false);
   });
 
   it('never shows the public Home to a signed-in session, or Our Projects to a signed-out one', () => {
@@ -36,7 +34,6 @@ describe('landing screen per session', () => {
   it.each([
     ['none', '/home'],
     ['guest', '/guest-home'],
-    ['client', '/guest-home'],
     ['associate', '/dashboard'],
   ] as const)('%s lands on %s', (kind, href) => {
     expect(landingFor(kind)).toBe(href);
@@ -52,12 +49,10 @@ describe('landing screen per session', () => {
 });
 
 describe('prototype account directory', () => {
-  it('lists each number once, in E.164, with a known login', () => {
-    const phones = PROTOTYPE_ACCOUNTS.map((a) => a.phone);
-    expect(new Set(phones).size).toBe(phones.length);
-    for (const account of PROTOTYPE_ACCOUNTS) {
-      expect(account.phone).toMatch(/^\+91[6-9]\d{9}$/);
-      expect(['associate', 'client']).toContain(account.kind);
+  it('lists each associate number once, in E.164', () => {
+    expect(new Set(PROTOTYPE_ACCOUNTS).size).toBe(PROTOTYPE_ACCOUNTS.length);
+    for (const phone of PROTOTYPE_ACCOUNTS) {
+      expect(phone).toMatch(/^\+91[6-9]\d{9}$/);
     }
   });
 });

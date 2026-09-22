@@ -77,7 +77,7 @@ describe('icon vocabulary', () => {
     expect(new Set(glyphs).size).toBe(glyphs.length);
   });
 
-  it('covers the seven dashboard sections and the three entry paths', () => {
+  it('covers the seven dashboard sections and the two entry paths', () => {
     for (const key of [
       'projects',
       'booking',
@@ -88,7 +88,6 @@ describe('icon vocabulary', () => {
       'myTeam',
       'guest',
       'associate',
-      'client',
     ] as const) {
       expect(icons[key]).toBeDefined();
     }

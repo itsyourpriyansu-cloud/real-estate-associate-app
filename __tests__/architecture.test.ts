@@ -174,9 +174,8 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
     'app/(public)/_layout.tsx',
     'app/(public)/home.tsx',
     'app/(public)/associate-login.tsx',
-    'app/(public)/simple-login.tsx',
     'app/(public)/otp.tsx',
-    // (guest): guest and client
+    // (guest): guest only
     'app/(guest)/_layout.tsx',
     'app/(guest)/guest-home.tsx',
     // (associate): dashboard + the seven sections
@@ -197,6 +196,7 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
     'app/projects/index.tsx',
     'app/projects/[projectId].tsx',
     'app/projects/[projectId]/inventory.tsx',
+    'app/projects/[projectId]/gallery.tsx',
     'app/plots/[plotId].tsx',
     'app/prototype-controls.tsx',
   ];
@@ -243,6 +243,7 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
         'projects/index',
         'projects/[projectId]',
         'projects/[projectId]/inventory',
+        'projects/[projectId]/gallery',
         'plots/[plotId]',
         'prototype-controls',
       ],

@@ -25,7 +25,7 @@ describe('basic list / get operations', () => {
 
   it('projects: lists 4 and gets by id', async () => {
     expect(await r.projects.list()).toHaveLength(4);
-    expect((await r.projects.getById('prj_real_rise'))?.name).toBe('Real Rise');
+    expect((await r.projects.getById('prj_real_rise'))?.name).toBe('Sunrise Meadows');
     expect(await r.projects.getById('nope')).toBeNull();
   });
 
@@ -148,11 +148,11 @@ describe('leads', () => {
 describe('projects and plots', () => {
   it('filters projects and keeps unit counts live after a prototype hold', async () => {
     const { repositories: r } = createTestRepositories();
-    expect((await r.projects.list({ query: 'aurelia' })).map((p) => p.name)).toEqual([
-      'Aurelia Greens',
+    expect((await r.projects.list({ query: 'emerald' })).map((p) => p.name)).toEqual([
+      'Emerald Hills',
     ]);
     const cheap = await r.projects.list({ maxStartingPrice: 3_000_000 });
-    expect(cheap.map((p) => p.name).sort()).toEqual(['Northgate County', 'Real Rise']);
+    expect(cheap.map((p) => p.name).sort()).toEqual(['Silver Creek', 'Sunrise Meadows']);
 
     const before = await r.projects.getById('prj_real_rise');
     await r.plots.placePrototypeHold('plot_rr_026');

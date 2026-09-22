@@ -68,6 +68,12 @@ export function ProjectsPreview() {
                       params: { projectId: project.id },
                     })
                   }
+                  onViewGallery={() =>
+                    router.push({
+                      pathname: '/projects/[projectId]/gallery',
+                      params: { projectId: project.id },
+                    })
+                  }
                   onShare={() =>
                     toast.show({ tone: 'info', message: 'Sharing arrives in a later stage.' })
                   }

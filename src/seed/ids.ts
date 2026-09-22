@@ -3,8 +3,6 @@
 export const ASSOCIATE_ID = 'usr_raghunath';
 export const TEAM_LEAD_ID = 'usr_meenakshi';
 export const ASSOCIATE_NAME = 'K. V. Raghunath Reddy';
-/** The Simple Login (client) demo user. */
-export const CLIENT_ID = 'usr_client_001';
 
 export type ProjectKey = 'rr' | 'ag' | 'nc' | 'ce';
 

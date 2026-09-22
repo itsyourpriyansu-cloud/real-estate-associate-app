@@ -8,7 +8,6 @@ The previous CRM shell (five tabs: Home · Leads · Projects · Tasks · Inbox) 
 
 ```text
 1 HOME (public) ──┬─ Guest Login ───────────────► 4 GUEST SCREEN ─► Our Projects
-                  ├─ Simple Login ─► OTP ───────► 4 GUEST SCREEN ─► Our Projects   (client: projects only)
                   └─ Associate Login ─► OTP ────► 3 ASSOCIATE DASHBOARD ─► 7 sections
 ```
 
@@ -16,7 +15,6 @@ The previous CRM shell (five tabs: Home · Leads · Projects · Tasks · Inbox) 
 | ------------ | --------------------------------------------- | ------------- | ----------------------------------------------------------------- |
 | `none`       | first launch / signed out                     | `/home`       | `(public)` only                                                   |
 | `guest`      | **Guest Login** (no credentials)              | `/guest-home` | `(guest)`, `/projects/**`, `/plots/**`, `/prototype-controls`     |
-| `client`     | **Simple Login** (phone + OTP, client number) | `/guest-home` | same as guest                                                     |
 | `associate`  | **Associate Login** (phone + OTP)             | `/dashboard`  | `(associate)`, `/projects/**`, `/plots/**`, `/prototype-controls` |
 
 ## Route tree
@@ -30,9 +28,8 @@ app/
 │   ├── _layout.tsx
 │   ├── home.tsx                      /home                 1  HOME PAGE
 │   ├── associate-login.tsx           /associate-login      2  ASSOCIATE LOGIN (phone)
-│   ├── simple-login.tsx              /simple-login            SIMPLE (client) LOGIN (phone)
-│   └── otp.tsx                       /otp                     shared OTP; the store remembers which login it belongs to
-├── (guest)/                          guard: kind === 'guest' | 'client'
+│   └── otp.tsx                       /otp                     OTP step for Associate Login
+├── (guest)/                          guard: kind === 'guest'
 │   ├── _layout.tsx
 │   └── guest-home.tsx                /guest-home           4  GUEST SCREEN
 ├── (associate)/                      guard: kind === 'associate'
@@ -52,7 +49,8 @@ app/
 ├── projects/                         guard: kind !== 'none'
 │   ├── index.tsx                     /projects                1. OUR PROJECTS
 │   ├── [projectId].tsx               /projects/:projectId
-│   └── [projectId]/inventory.tsx     /projects/:projectId/inventory
+│   ├── [projectId]/inventory.tsx     /projects/:projectId/inventory
+│   └── [projectId]/gallery.tsx       /projects/:projectId/gallery
 ├── plots/[plotId].tsx                /plots/:plotId           guard: kind !== 'none'
 ├── prototype-controls.tsx            /prototype-controls      guard: kind !== 'none'
 └── dev/design-system.tsx             /dev/design-system       (dev builds only)

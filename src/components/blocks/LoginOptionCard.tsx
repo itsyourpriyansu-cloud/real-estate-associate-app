@@ -20,7 +20,7 @@ export interface LoginOptionCardProps {
 }
 
 /**
- * One way in (Guest, Associate, Simple). A radio card: selecting it draws a green ring and a check
+ * One way in (Guest or Associate). A radio card: selecting it draws a green ring and a check
  * that springs in; the others stay quiet. The whole card is one radio for screen readers.
  */
 export function LoginOptionCard({

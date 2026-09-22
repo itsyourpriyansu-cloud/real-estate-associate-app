@@ -10,6 +10,7 @@ import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { GuestHome } from '@/features/guest/GuestHome';
 import { PublicHome } from '@/features/landing/PublicHome';
 import { PriceCalculatorScreen } from '@/features/calculator/PriceCalculatorScreen';
+import { ProjectGalleryScreen } from '@/features/projects/ProjectGalleryScreen';
 import { ProjectsScreen } from '@/features/projects/ProjectsScreen';
 import { TeamSalesScreen } from '@/features/sales/TeamSalesScreen';
 import { SiteVisitsScreen } from '@/features/visits/SiteVisitsScreen';
@@ -43,7 +44,7 @@ afterEach(async () => {
 });
 
 describe('Public Home', () => {
-  it('shows the public numbers from the summary repository and three ways in', async () => {
+  it('shows the public numbers from the summary repository and two ways in', async () => {
     await show(<PublicHome />);
     expect(await screen.findByText('Total registered sq. yards')).toBeTruthy();
     expect(await screen.findByLabelText('Completed, 2')).toBeTruthy();
@@ -52,7 +53,7 @@ describe('Public Home', () => {
 
     expect(screen.getByRole('radio', { name: /^Guest\./ })).toBeTruthy();
     expect(screen.getByRole('radio', { name: /^Associate\./ })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: /^Simple login\./ })).toBeTruthy();
+    expect(screen.queryByRole('radio', { name: /^Simple login\./ })).toBeNull();
   });
 
   it('defaults to Associate, and choosing Guest changes the action and signs in as a guest', async () => {
@@ -147,14 +148,23 @@ describe('Dashboard', () => {
 describe('Our Projects', () => {
   it('lists every project with live counts and filters by status', async () => {
     await show(<ProjectsScreen />);
-    expect(await screen.findByText('Real Rise')).toBeTruthy();
+    expect(await screen.findByText('Sunrise Meadows')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'All, 4' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Ongoing, 2' })).toBeTruthy();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Ongoing, 2' }));
-    expect(screen.queryByText('Real Rise')).toBeNull();
-    expect(screen.getByText('Aurelia Greens')).toBeTruthy();
-    expect(screen.getByText('Cedar Enclave')).toBeTruthy();
+    expect(screen.queryByText('Sunrise Meadows')).toBeNull();
+    expect(screen.getByText('Emerald Hills')).toBeTruthy();
+    expect(screen.getByText('Maple Ridge')).toBeTruthy();
+  });
+});
+
+describe('Project Gallery', () => {
+  it('shows every stock photo for the project', async () => {
+    await show(<ProjectGalleryScreen projectId="prj_real_rise" />);
+    expect(await screen.findByText('Gallery')).toBeTruthy();
+    expect(screen.getByText('Sunrise Meadows')).toBeTruthy();
+    expect(screen.getAllByLabelText(/Sunrise Meadows photo \d/).length).toBe(5);
   });
 });
 

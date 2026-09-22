@@ -35,4 +35,5 @@ The single source of truth is `docs/REAL_ESTATE_ASSOCIATE_PHASE1_CLAUDE_MASTER.m
 - RNTL 14's `act` is **async**: always `await act(async () => …)`. An un-awaited `act` leaves React's act scope open and silently stops all later updates from flushing.
 - Reanimated shared values: use `sv.set(x)` (not `sv.value = x`) — the Expo lint config's React-Compiler rules flag the latter.
 - Jest needs `react-native-gesture-handler/jestSetup`, the Reanimated + worklets mocks (see `jest.setup.ts`), and lucide mapped to its CJS build (`jest.config.js`).
+- `expo-image`'s `<Image>` is mocked to a plain `View` in `jest.setup.ts` — a real `uri` has no network to resolve against in tests and hangs every render until timeout. Add real assertions against the wrapping View's `accessibilityLabel`, never the `Image` element.
 - Bash `--` argument and inline-heredoc quoting on Windows is fragile; write scripts to files.

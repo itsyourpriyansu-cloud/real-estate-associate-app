@@ -1,6 +1,6 @@
 import type { User } from '@/domain';
 
-import { ASSOCIATE_ID, ASSOCIATE_NAME, CLIENT_ID, TEAM_LEAD_ID, memberId } from './ids';
+import { ASSOCIATE_ID, ASSOCIATE_NAME, TEAM_LEAD_ID, memberId } from './ids';
 import type { SeedTime } from './time';
 
 export const TEAM_NAME = 'YHIPL2';
@@ -211,10 +211,9 @@ function memberUser(t: SeedTime, bp: MemberBlueprint): User {
 }
 
 /**
- * The prototype login (+91 9876543210) resolves to the associate; Simple Login uses the client
- * (+91 9876500100). All phone numbers and emails in the seed are synthetic (example.com addresses,
- * sequential numbers) — no real customer data. `PROTOTYPE_ACCOUNTS` (constants) lists the same
- * numbers and a test keeps the two in step.
+ * The prototype login (+91 9876543210) resolves to the associate. All phone numbers and emails in
+ * the seed are synthetic (example.com addresses, sequential numbers) — no real customer data.
+ * `PROTOTYPE_ACCOUNTS` (constants) lists the same numbers and a test keeps the two in step.
  *
  * Order matters: the mock's `currentAssociate` is the first ASSOCIATE, so the demo associate stays first.
  */
@@ -246,17 +245,6 @@ export function buildUsers(t: SeedTime): User[] {
       joinedAt: t.at(-900, '10:00'),
       status: 'ACTIVE',
       reraRegistration: 'DEMO-RERA-ASSOC-0007',
-    },
-    {
-      id: CLIENT_ID,
-      role: 'CLIENT',
-      fullName: 'Suresh Nair',
-      phone: '+919876500100',
-      email: 'suresh.nair@example.com',
-      associateCode: 'CLIENT-0001',
-      designation: 'Client',
-      joinedAt: t.at(-30, '10:00'),
-      status: 'ACTIVE',
     },
     ...MEMBERS.map((bp) => memberUser(t, bp)),
   ];

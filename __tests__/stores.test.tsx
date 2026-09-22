@@ -31,7 +31,7 @@ describe('auth store (session only)', () => {
     const auth = useAuthStore.getState();
     expect(auth.session).toEqual({ kind: 'none' });
 
-    expect(await auth.requestOtp('123', 'associate')).toEqual({
+    expect(await auth.requestOtp('123')).toEqual({
       ok: false,
       error: 'INVALID_PHONE',
     });
@@ -40,12 +40,11 @@ describe('auth store (session only)', () => {
       error: 'NO_PENDING_PHONE',
     });
 
-    expect(await useAuthStore.getState().requestOtp('9876543210', 'associate')).toEqual({
+    expect(await useAuthStore.getState().requestOtp('9876543210')).toEqual({
       ok: true,
     });
     expect(useAuthStore.getState()).toMatchObject({
       pendingPhone: '+919876543210',
-      pendingAs: 'associate',
     });
     expect(await useAuthStore.getState().verifyOtp('000000')).toEqual({
       ok: false,
@@ -57,36 +56,22 @@ describe('auth store (session only)', () => {
     expect(useAuthStore.getState()).toMatchObject({
       session: { kind: 'associate', phone: '+919876543210' },
       pendingPhone: null,
-      pendingAs: null,
     });
 
     useAuthStore.getState().signOut();
     expect(useAuthStore.getState().session).toEqual({ kind: 'none' });
   });
 
-  it('gives a client number a client session, and a guest needs no credentials', async () => {
-    await useAuthStore.getState().requestOtp('9876500100', 'client');
-    await useAuthStore.getState().verifyOtp('123456');
-    expect(useAuthStore.getState().session).toEqual({ kind: 'client', phone: '+919876500100' });
-
-    useAuthStore.getState().signOut();
+  it('lets a guest browse with no credentials', () => {
     useAuthStore.getState().continueAsGuest();
     expect(useAuthStore.getState().session).toEqual({ kind: 'guest' });
     expect(selectSessionKind(useAuthStore.getState())).toBe('guest');
   });
 
-  it('refuses a number on the wrong login without leaving a pending phone', async () => {
-    expect(await useAuthStore.getState().requestOtp('9876500100', 'associate')).toEqual({
-      ok: false,
-      error: 'WRONG_ROLE',
-    });
-    expect(useAuthStore.getState()).toMatchObject({ pendingPhone: null, pendingAs: null });
-  });
-
   it('persists the session but not the pending phone, and stores no CRM data', async () => {
-    await useAuthStore.getState().requestOtp('9876543210', 'associate');
+    await useAuthStore.getState().requestOtp('9876543210');
     await useAuthStore.getState().verifyOtp('123456');
-    await useAuthStore.getState().requestOtp('9123456780', 'associate');
+    await useAuthStore.getState().requestOtp('9123456780');
 
     const persisted = JSON.parse((await storage.getItem(STORAGE_KEYS.auth)) ?? '{}') as {
       state: Record<string, unknown>;
@@ -224,7 +209,7 @@ describe('profile route wiring: screen → feature hook → repository → mock 
   });
 
   it('signs out from the profile screen', async () => {
-    await useAuthStore.getState().requestOtp('9876543210', 'associate');
+    await useAuthStore.getState().requestOtp('9876543210');
     await useAuthStore.getState().verifyOtp('123456');
     await renderProfile();
     await screen.findByText(/Raghunath/);

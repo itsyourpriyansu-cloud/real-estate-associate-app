@@ -50,17 +50,24 @@ export function PropertyCommsDashboard({ data }: { data: ShowcaseData }) {
         note="Every plot status is text + icon + tone. Prices are tabular and never overflow."
       >
         <Specimen label="Project card">
-          <ProjectCard project={project} onPress={noop} onViewInventory={noop} onShare={noop} />
+          <ProjectCard
+            project={project}
+            onPress={noop}
+            onViewInventory={noop}
+            onViewGallery={noop}
+            onShare={noop}
+          />
         </Specimen>
         <Specimen label="Project card · long name, sold out">
           <ProjectCard
             project={{
               ...project,
-              name: 'Aurelia Greens Signature Collection Phase Two Extension',
+              name: 'Emerald Hills Signature Collection Phase Two Extension',
               availableUnits: 0,
             }}
             onPress={noop}
             onViewInventory={noop}
+            onViewGallery={noop}
             onShare={noop}
           />
         </Specimen>

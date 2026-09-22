@@ -81,12 +81,12 @@ Answered from the rendered screenshots (a designer's eye, not a metric):
 
 ## App-flow restructure (route tree, session, contracts)
 
-- [x] **Session guards** — none / guest / client / associate against every route group, plus the landing per session (`session.test.ts`).
+- [x] **Session guards** — none / guest / associate against every route group, plus the landing per session (`session.test.ts`).
 - [x] **Route tree** — every route file exists, the CRM route files are gone, every top-level route is registered in the root layout (`architecture.test.ts`).
-- [x] **Wrong-role login** — an associate number on Simple Login and a client number on Associate Login show an inline error and set no pending phone (`stores.test.tsx`, `services.test.ts`, browser walk).
+- [x] **Invalid phone / OTP** — a malformed number and a wrong code show an inline error and set no pending phone (`stores.test.tsx`, `services.test.ts`, browser walk). Simple Login (client) was removed; there is only one login now, so there is no "wrong login" case to test.
 - [x] **Persisted session migration** — a v1 `{status, phone}` session becomes an associate session; signed-out stays signed out (`stores.test.tsx`).
 - [x] **Team / Sales / Summary** — downline levels, add member (default sponsor, deeper sponsor, duplicate, outside sponsor), booking side effects, pending states, offline (`flow.test.ts`).
-- [x] **Browser walk (Chrome 390x844, `expo start --web`)** — Home to Guest / Associate / Simple login; OTP; Dashboard to all 7 sections plus Profile and Settings and back; sign out; client deep link `/dashboard` lands on the guest hub; a guest session survives a reload; **0 console errors**.
+- [x] **Browser walk (Chrome 390x844, `expo start --web`)** — Home to Guest / Associate; OTP; Dashboard to all 7 sections plus Profile and Settings and back; sign out; a guest session survives a reload; **0 console errors**.
 - [x] **Production bundle** — `expo export --platform android` succeeds with the new tree.
 - [ ] **Not verified:** a device/emulator run, Expo Doctor after the restructure, an iOS bundle.
 

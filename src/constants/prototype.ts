@@ -9,22 +9,15 @@ export const APP_SHORT_NAME = 'Vara';
 /** Deterministic prototype credentials (spec §30). Not secure, not production-ready. */
 export const PROTOTYPE_CREDENTIALS = {
   phone: '9876543210',
-  /** Demo client number for Simple Login. */
-  clientPhone: '9876500100',
   otp: '123456',
 } as const;
 
 /**
- * The prototype's account directory: which login each known number belongs to. A real backend
- * returns the role with the auth token. Numbers not listed here are accepted for whichever login
- * they were entered on (the prototype accepts any valid number); a listed number used on the wrong
- * login is rejected. `__tests__/session.test.ts` keeps this in step with the seeded users.
+ * The prototype's account directory: known associate numbers. A real backend returns the role
+ * with the auth token; the prototype accepts any valid 10-digit number, known or not.
+ * `__tests__/session.test.ts` keeps this in step with the seeded users.
  */
-export const PROTOTYPE_ACCOUNTS = [
-  { phone: '+919876543210', kind: 'associate' },
-  { phone: '+919876500001', kind: 'associate' },
-  { phone: '+919876500100', kind: 'client' },
-] as const;
+export const PROTOTYPE_ACCOUNTS = ['+919876543210', '+919876500001'] as const;
 
 /** Country calling code used when normalising a 10-digit prototype phone number to E.164. */
 export const DEFAULT_COUNTRY_CODE = '+91';

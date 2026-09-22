@@ -4,9 +4,9 @@ import type { SessionKind } from '@/store/authStore';
 
 /** The route groups in `app/` and whether a session may see each (docs/SCREEN_MAP.md). */
 export interface SessionAccess {
-  /** `(public)`: Home and the login screens. Signed out only. */
+  /** `(public)`: Home and the login screen. Signed out only. */
   public: boolean;
-  /** `(guest)`: the guest hub. Guests and clients. */
+  /** `(guest)`: the guest hub. Guests only. */
   guest: boolean;
   /** `(associate)`: the dashboard and its sections. Associates only. */
   associate: boolean;
@@ -17,7 +17,6 @@ export interface SessionAccess {
 const ACCESS: Record<SessionKind, SessionAccess> = {
   none: { public: true, guest: false, associate: false, shared: false },
   guest: { public: false, guest: true, associate: false, shared: true },
-  client: { public: false, guest: true, associate: false, shared: true },
   associate: { public: false, guest: false, associate: true, shared: true },
 };
 
@@ -27,7 +26,6 @@ export const accessFor = (kind: SessionKind): SessionAccess => ACCESS[kind];
 const LANDING: Record<SessionKind, Href> = {
   none: '/home',
   guest: '/guest-home',
-  client: '/guest-home',
   associate: '/dashboard',
 };
 

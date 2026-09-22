@@ -7,25 +7,19 @@ import { Button } from '@/components/buttons/Button';
 import { PhoneField } from '@/components/forms/SpecialFields';
 import { PROTOTYPE_CREDENTIALS } from '@/constants/prototype';
 import { space } from '@/design-system';
-import { indianMobileSchema, type LoginAs } from '@/services/auth';
+import { indianMobileSchema } from '@/services/auth';
 import { haptics } from '@/services/haptics';
 import { useAuthStore } from '@/store/authStore';
 
 const formSchema = z.object({ phone: indianMobileSchema });
 type FormValues = z.infer<typeof formSchema>;
 
-const WRONG_ROLE_COPY: Record<LoginAs, string> = {
-  associate: 'This number isn’t registered as an associate. Try Simple Login instead.',
-  client: 'This number belongs to an associate account. Use Associate Login instead.',
-};
-
 /**
- * Phone step of the prototype login, shared by Associate Login and Simple (client) Login.
- * Validation is the shared Zod schema (10-digit Indian mobile), errors appear as text under the
- * field, and the submit button shows a loading state. Any valid number advances unless it belongs
- * to the other login; the demo number for this login is offered as a one-tap fill.
+ * Phone step of the prototype login. Validation is the shared Zod schema (10-digit Indian
+ * mobile), errors appear as text under the field, and the submit button shows a loading state.
+ * Any valid number is accepted; the demo number is offered as a one-tap fill.
  */
-export function PhoneLoginForm({ as, onSubmitted }: { as: LoginAs; onSubmitted: () => void }) {
+export function PhoneLoginForm({ onSubmitted }: { onSubmitted: () => void }) {
   const requestOtp = useAuthStore((state) => state.requestOtp);
   const {
     control,
@@ -36,22 +30,14 @@ export function PhoneLoginForm({ as, onSubmitted }: { as: LoginAs; onSubmitted: 
   } = useForm<FormValues>({ resolver: zodResolver(formSchema), defaultValues: { phone: '' } });
 
   const submit = handleSubmit(async ({ phone }) => {
-    const result = await requestOtp(phone, as);
+    const result = await requestOtp(phone);
     if (result.ok) {
       onSubmitted();
     } else {
       haptics.error();
-      setError('phone', {
-        message:
-          result.error === 'WRONG_ROLE'
-            ? WRONG_ROLE_COPY[as]
-            : 'Enter a valid 10-digit mobile number.',
-      });
+      setError('phone', { message: 'Enter a valid 10-digit mobile number.' });
     }
   });
-
-  const demoNumber =
-    as === 'client' ? PROTOTYPE_CREDENTIALS.clientPhone : PROTOTYPE_CREDENTIALS.phone;
 
   return (
     <View style={{ gap: space[20] }}>
@@ -74,11 +60,11 @@ export function PhoneLoginForm({ as, onSubmitted }: { as: LoginAs; onSubmitted: 
       <View style={{ gap: space[8] }}>
         <Button label="Continue" onPress={submit} loading={isSubmitting} fullWidth />
         <Button
-          label={`Use demo number ${demoNumber}`}
+          label={`Use demo number ${PROTOTYPE_CREDENTIALS.phone}`}
           variant="tertiary"
           size="medium"
           fullWidth
-          onPress={() => setValue('phone', demoNumber, { shouldValidate: true })}
+          onPress={() => setValue('phone', PROTOTYPE_CREDENTIALS.phone, { shouldValidate: true })}
         />
       </View>
     </View>

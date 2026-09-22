@@ -62,12 +62,9 @@ describe('flow seed: team, sales, targets, project status', () => {
   });
 
   it('keeps PROTOTYPE_ACCOUNTS in step with the seeded users', () => {
-    for (const account of PROTOTYPE_ACCOUNTS) {
-      const user = data.users.find((u) => u.phone === account.phone);
-      expect(user).toBeDefined();
-      expect(user?.role === 'CLIENT' ? 'client' : 'associate').toBe(account.kind);
+    for (const phone of PROTOTYPE_ACCOUNTS) {
+      expect(data.users.find((u) => u.phone === phone)).toBeDefined();
     }
-    expect(data.users.filter((u) => u.role === 'CLIENT')).toHaveLength(1);
   });
 
   it('seeds one sale for every booked plot, copied from the plot and sold by a real user', () => {

@@ -2,11 +2,8 @@ import { z } from 'zod';
 
 import { idSchema, isoDateTimeSchema, phoneSchema } from './common';
 
-/**
- * `CLIENT` is a Simple Login user (Our Projects only). `ASSOCIATE` and `TEAM_LEAD` are the sales
- * roles; both sign in through Associate Login.
- */
-export const userRoleSchema = z.enum(['ASSOCIATE', 'TEAM_LEAD', 'CLIENT']);
+/** `ASSOCIATE` and `TEAM_LEAD` are the sales roles; both sign in through Associate Login. */
+export const userRoleSchema = z.enum(['ASSOCIATE', 'TEAM_LEAD']);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
 export const userStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);

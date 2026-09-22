@@ -3,8 +3,9 @@ import type { Plot, Project, ProjectStatus } from '@/domain';
 import { PROJECT_ID, type ProjectKey } from './ids';
 
 /**
- * Fictional but realistic demo projects (spec §12). Names, developers and RERA labels are invented
- * for the prototype and must never be presented as real regulated offerings.
+ * Fictional but realistic demo projects (spec §12). Names and RERA labels are invented for the
+ * prototype and must never be presented as real regulated offerings. Every project is developed
+ * by Vara Real Estates itself, so there is one brand, not four invented competing companies.
  */
 export interface ProjectBlueprint {
   key: ProjectKey;
@@ -36,8 +37,8 @@ export const PROJECT_BLUEPRINTS: readonly ProjectBlueprint[] = [
   {
     key: 'rr',
     id: PROJECT_ID.rr,
-    name: 'Real Rise',
-    developerName: 'Meridian Landmarks',
+    name: 'Sunrise Meadows',
+    developerName: 'Vara Real Estates',
     location: 'Bangalore Highway',
     city: 'Hyderabad',
     status: 'COMPLETED',
@@ -69,8 +70,8 @@ export const PROJECT_BLUEPRINTS: readonly ProjectBlueprint[] = [
   {
     key: 'ag',
     id: PROJECT_ID.ag,
-    name: 'Aurelia Greens',
-    developerName: 'Aurelia Estates',
+    name: 'Emerald Hills',
+    developerName: 'Vara Real Estates',
     location: 'Airport Corridor',
     city: 'Hyderabad',
     status: 'ONGOING',
@@ -102,8 +103,8 @@ export const PROJECT_BLUEPRINTS: readonly ProjectBlueprint[] = [
   {
     key: 'nc',
     id: PROJECT_ID.nc,
-    name: 'Northgate County',
-    developerName: 'Northgate Realty',
+    name: 'Silver Creek',
+    developerName: 'Vara Real Estates',
     location: 'Hyderabad Highway',
     city: 'Hyderabad',
     status: 'COMPLETED',
@@ -134,8 +135,8 @@ export const PROJECT_BLUEPRINTS: readonly ProjectBlueprint[] = [
   {
     key: 'ce',
     id: PROJECT_ID.ce,
-    name: 'Cedar Enclave',
-    developerName: 'Cedar Habitat Developers',
+    name: 'Maple Ridge',
+    developerName: 'Vara Real Estates',
     location: 'Outer Ring Growth Zone',
     city: 'Hyderabad',
     status: 'ONGOING',
@@ -165,9 +166,16 @@ export const PROJECT_BLUEPRINTS: readonly ProjectBlueprint[] = [
   },
 ];
 
+/** Free-to-use stock photography (picsum.photos), seeded per project so it never changes. */
+const stockImage = (seed: string, width: number, height: number) =>
+  `https://picsum.photos/seed/${seed}/${width}/${height}`;
+
+const GALLERY_SIZE = 5;
+
 /**
  * Projects are derived from plots so unit counts and price/size ranges can never disagree with the
- * inventory. `heroImageUrl` / `thumbnailUrl` use the `placeholder://` scheme (see domain/project.ts).
+ * inventory. `heroImageUrl` / `thumbnailUrl` / `galleryImages` are real stock photo URLs (see
+ * domain/project.ts); `ProjectImage` falls back to drawn artwork only for a `placeholder://` source.
  */
 export function buildProjects(plots: readonly Plot[]): Project[] {
   return PROJECT_BLUEPRINTS.map((bp) => {
@@ -181,8 +189,11 @@ export function buildProjects(plots: readonly Plot[]): Project[] {
       location: bp.location,
       city: bp.city,
       status: bp.status,
-      heroImageUrl: `placeholder://projects/${bp.key}/hero`,
-      thumbnailUrl: `placeholder://projects/${bp.key}/thumb`,
+      heroImageUrl: stockImage(`${bp.key}-hero`, 900, 600),
+      thumbnailUrl: stockImage(`${bp.key}-hero`, 300, 200),
+      galleryImages: Array.from({ length: GALLERY_SIZE }, (_, i) =>
+        stockImage(`${bp.key}-${i}`, 900, 600),
+      ),
       startingPrice: Math.min(...totals),
       maxPrice: Math.max(...totals),
       minPlotAreaSqYd: Math.min(...areas),

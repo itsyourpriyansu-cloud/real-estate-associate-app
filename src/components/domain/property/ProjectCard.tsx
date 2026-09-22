@@ -16,20 +16,22 @@ import { PropertyMetric } from './InventoryParts';
 import { ProjectImage } from './ProjectImage';
 
 /**
- * A project for browsing: image, name and location, price and size, live availability, and one
- * primary action. Availability is a chip with a dot and the count in words — a sales person cares
- * how many plots can be shown today. The card opens the project; "View inventory" and "Share" are
- * siblings of that press region, never nested inside it.
+ * A project for browsing: image, name and location, price and size, live availability, and its
+ * actions. Availability is a chip with a dot and the count in words — a sales person cares how
+ * many plots can be shown today. The card opens the project; "View inventory", "View Gallery" and
+ * "Share" are siblings of that press region, never nested inside it.
  */
 export function ProjectCard({
   project,
   onPress,
   onViewInventory,
+  onViewGallery,
   onShare,
 }: {
   project: Project;
   onPress?: () => void;
   onViewInventory?: () => void;
+  onViewGallery?: () => void;
   onShare?: () => void;
 }) {
   const soldOut = project.availableUnits === 0;
@@ -77,18 +79,27 @@ export function ProjectCard({
           </View>
         </View>
       </CardPressRegion>
-      <View
-        style={{ flexDirection: 'row', alignItems: 'center', gap: space[8], padding: space[16] }}
-      >
-        <View style={{ flex: 1 }}>
-          <Button label="View inventory" size="medium" fullWidth onPress={onViewInventory} />
+      <View style={{ gap: space[8], padding: space[16] }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>
+          <View style={{ flex: 1 }}>
+            <Button label="View inventory" size="medium" fullWidth onPress={onViewInventory} />
+          </View>
+          {onShare ? (
+            <IconButton
+              icon={Share2}
+              accessibilityLabel={`Share ${project.name}`}
+              variant="outline"
+              onPress={onShare}
+            />
+          ) : null}
         </View>
-        {onShare ? (
-          <IconButton
-            icon={Share2}
-            accessibilityLabel={`Share ${project.name}`}
-            variant="outline"
-            onPress={onShare}
+        {onViewGallery ? (
+          <Button
+            label="View Gallery"
+            variant="secondary"
+            size="medium"
+            fullWidth
+            onPress={onViewGallery}
           />
         ) : null}
       </View>

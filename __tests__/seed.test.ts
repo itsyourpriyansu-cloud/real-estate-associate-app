@@ -143,10 +143,10 @@ describe('seed volume and content (Normal)', () => {
 
   it('contains the four suggested projects', () => {
     expect(data.projects.map((p) => p.name).sort()).toEqual([
-      'Aurelia Greens',
-      'Cedar Enclave',
-      'Northgate County',
-      'Real Rise',
+      'Emerald Hills',
+      'Maple Ridge',
+      'Silver Creek',
+      'Sunrise Meadows',
     ]);
   });
 
@@ -160,8 +160,8 @@ describe('seed volume and content (Normal)', () => {
     }
   });
 
-  it('gives the walkthrough its anchor: Real Rise · Plot 26 · 240 sq yd · Available', () => {
-    const realRise = data.projects.find((p) => p.name === 'Real Rise');
+  it('gives the walkthrough its anchor: Sunrise Meadows · Plot 26 · 240 sq yd · Available', () => {
+    const realRise = data.projects.find((p) => p.name === 'Sunrise Meadows');
     const plot = data.plots.find((p) => p.projectId === realRise?.id && p.plotNumber === '26');
     expect(plot).toMatchObject({ status: 'AVAILABLE', areaSqYd: 240 });
     expect(() => plotSchema.parse(plot)).not.toThrow();

@@ -62,11 +62,12 @@ export default function RootLayout() {
                 <Stack.Screen name="(associate)" />
               </Stack.Protected>
 
-              {/* Shared by guest, client and associate: Our Projects and everything under it. */}
+              {/* Shared by guest and associate: Our Projects and everything under it. */}
               <Stack.Protected guard={access.shared}>
                 <Stack.Screen name="projects/index" />
                 <Stack.Screen name="projects/[projectId]" />
                 <Stack.Screen name="projects/[projectId]/inventory" />
+                <Stack.Screen name="projects/[projectId]/gallery" />
                 <Stack.Screen name="plots/[plotId]" />
                 <Stack.Screen name="prototype-controls" />
               </Stack.Protected>

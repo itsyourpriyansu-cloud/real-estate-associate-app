@@ -14,10 +14,9 @@ import {
 import { space } from '@/design-system';
 import { useAuthStore } from '@/store/authStore';
 
-/** 4 · GUEST — a guest or client sees one thing: Our Projects. */
+/** 4 · GUEST — a guest sees one thing: Our Projects. */
 export function GuestHome() {
   const router = useRouter();
-  const kind = useAuthStore((state) => state.session.kind);
   const signOut = useAuthStore((state) => state.signOut);
 
   return (
@@ -27,7 +26,7 @@ export function GuestHome() {
           <Wordmark />
           <View style={{ gap: space[4] }}>
             <AppText variant="displayMedium" header>
-              {kind === 'client' ? 'Welcome back.' : 'Welcome.'}
+              Welcome.
             </AppText>
             <AppText tone="secondary">
               Explore every Vara project: where it is, how far along it is, and which plots are
@@ -47,12 +46,7 @@ export function GuestHome() {
       </NavPanel>
 
       <Reveal index={2}>
-        <Button
-          label={kind === 'client' ? 'Sign out' : 'Back to Home'}
-          variant="secondary"
-          onPress={signOut}
-          fullWidth
-        />
+        <Button label="Back to Home" variant="secondary" onPress={signOut} fullWidth />
       </Reveal>
     </ScreenLayout>
   );

@@ -2,18 +2,17 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { STORAGE_KEYS } from '@/constants/prototype';
-import { prototypeAuth, type AuthResult, type LoginAs } from '@/services/auth';
+import { prototypeAuth, type AuthResult } from '@/services/auth';
 import { storage } from '@/services/storage';
 
 /**
- * Who is using the app. `none` sees only the public Home and the login screens; `guest` and
- * `client` see Our Projects; `associate` sees the dashboard. It is session state only — a kind and
- * a phone number, never a user record. Profile data comes from `UserRepository`.
+ * Who is using the app. `none` sees only the public Home and the login screen; `guest` sees Our
+ * Projects; `associate` sees the dashboard. It is session state only — a kind and a phone number,
+ * never a user record. Profile data comes from `UserRepository`.
  */
 export type Session =
   | { kind: 'none' }
   | { kind: 'guest' }
-  | { kind: 'client'; phone: string }
   | { kind: 'associate'; phone: string };
 
 export type SessionKind = Session['kind'];
@@ -22,10 +21,9 @@ const SIGNED_OUT: Session = { kind: 'none' };
 
 interface AuthState {
   session: Session;
-  /** Phone awaiting OTP verification, and the login it was entered on. Not persisted. */
+  /** Phone awaiting OTP verification. Not persisted. */
   pendingPhone: string | null;
-  pendingAs: LoginAs | null;
-  requestOtp: (phoneInput: string, as: LoginAs) => Promise<AuthResult>;
+  requestOtp: (phoneInput: string) => Promise<AuthResult>;
   verifyOtp: (code: string) => Promise<AuthResult>;
   /** Guest Login: no credentials, browse Our Projects. */
   continueAsGuest: () => void;
@@ -52,34 +50,28 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       session: SIGNED_OUT,
       pendingPhone: null,
-      pendingAs: null,
 
-      async requestOtp(phoneInput, as) {
-        const result = await prototypeAuth.requestOtp(phoneInput, as);
+      async requestOtp(phoneInput) {
+        const result = await prototypeAuth.requestOtp(phoneInput);
         if (result.ok) {
-          set({ pendingPhone: prototypeAuth.normalizePhone(phoneInput), pendingAs: as });
+          set({ pendingPhone: prototypeAuth.normalizePhone(phoneInput) });
         }
         return result;
       },
 
       async verifyOtp(code) {
-        const { pendingPhone, pendingAs } = get();
-        if (!pendingPhone || !pendingAs) return { ok: false, error: 'NO_PENDING_PHONE' };
+        const { pendingPhone } = get();
+        if (!pendingPhone) return { ok: false, error: 'NO_PENDING_PHONE' };
         const result = await prototypeAuth.verifyOtp(code);
         if (result.ok) {
-          set({
-            session: { kind: pendingAs, phone: pendingPhone },
-            pendingPhone: null,
-            pendingAs: null,
-          });
+          set({ session: { kind: 'associate', phone: pendingPhone }, pendingPhone: null });
         }
         return result;
       },
 
-      continueAsGuest: () =>
-        set({ session: { kind: 'guest' }, pendingPhone: null, pendingAs: null }),
+      continueAsGuest: () => set({ session: { kind: 'guest' }, pendingPhone: null }),
 
-      signOut: () => set({ session: SIGNED_OUT, pendingPhone: null, pendingAs: null }),
+      signOut: () => set({ session: SIGNED_OUT, pendingPhone: null }),
     }),
     {
       name: STORAGE_KEYS.auth,

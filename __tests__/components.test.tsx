@@ -232,7 +232,7 @@ describe('ProjectCard', () => {
   it('shows name, location, price, sizes and live availability', async () => {
     const { realRise } = await loadSamples();
     await show(<ProjectCard project={realRise} />);
-    expect(screen.getByText('Real Rise')).toBeTruthy();
+    expect(screen.getByText('Sunrise Meadows')).toBeTruthy();
     expect(screen.getByText('Bangalore Highway · Completed')).toBeTruthy();
     expect(screen.getByText('₹26.8L')).toBeTruthy();
     expect(screen.getByText('150–360 sq yd')).toBeTruthy();
@@ -258,12 +258,26 @@ describe('ProjectCard', () => {
       />,
     );
     await fireEvent.press(screen.getByRole('button', { name: 'View inventory' }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Share Real Rise' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Share Sunrise Meadows' }));
     expect(onViewInventory).toHaveBeenCalledTimes(1);
     expect(onShare).toHaveBeenCalledTimes(1);
     expect(onPress).not.toHaveBeenCalled();
-    const region = screen.getByRole('button', { name: /^Real Rise, Bangalore Highway/ });
+    const region = screen.getByRole('button', { name: /^Sunrise Meadows, Bangalore Highway/ });
     expect(within(region).queryByRole('button')).toBeNull();
+  });
+
+  it('shows a "View Gallery" action below "View inventory" when a handler is given', async () => {
+    const { realRise } = await loadSamples();
+    const onViewGallery = jest.fn();
+    await show(<ProjectCard project={realRise} onViewGallery={onViewGallery} />);
+    await fireEvent.press(screen.getByRole('button', { name: 'View Gallery' }));
+    expect(onViewGallery).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no "View Gallery" action when no handler is given', async () => {
+    const { realRise } = await loadSamples();
+    await show(<ProjectCard project={realRise} />);
+    expect(screen.queryByRole('button', { name: 'View Gallery' })).toBeNull();
   });
 });
 

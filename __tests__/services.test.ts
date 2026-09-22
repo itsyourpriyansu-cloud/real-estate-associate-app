@@ -131,8 +131,8 @@ describe('prototype auth', () => {
   });
 
   it('accepts only the fixed prototype OTP', async () => {
-    expect(await prototypeAuth.requestOtp('9876543210', 'associate')).toEqual({ ok: true });
-    expect(await prototypeAuth.requestOtp('12', 'associate')).toEqual({
+    expect(await prototypeAuth.requestOtp('9876543210')).toEqual({ ok: true });
+    expect(await prototypeAuth.requestOtp('12')).toEqual({
       ok: false,
       error: 'INVALID_PHONE',
     });
@@ -140,27 +140,13 @@ describe('prototype auth', () => {
     expect(await prototypeAuth.verifyOtp('000000')).toEqual({ ok: false, error: 'INVALID_OTP' });
     expect(PROTOTYPE_CREDENTIALS).toEqual({
       phone: '9876543210',
-      clientPhone: '9876500100',
       otp: '123456',
     });
   });
 
-  it('rejects a known number on the wrong login, and accepts unknown numbers on either', async () => {
-    expect(prototypeAuth.accountKind('+919876543210')).toBe('associate');
-    expect(prototypeAuth.accountKind('+919876500100')).toBe('client');
-    expect(prototypeAuth.accountKind('+919123456780')).toBeNull();
-
-    expect(await prototypeAuth.requestOtp('9876500100', 'associate')).toEqual({
-      ok: false,
-      error: 'WRONG_ROLE',
-    });
-    expect(await prototypeAuth.requestOtp('9876543210', 'client')).toEqual({
-      ok: false,
-      error: 'WRONG_ROLE',
-    });
-    expect(await prototypeAuth.requestOtp('9876500100', 'client')).toEqual({ ok: true });
-    expect(await prototypeAuth.requestOtp('9123456780', 'associate')).toEqual({ ok: true });
-    expect(await prototypeAuth.requestOtp('9123456780', 'client')).toEqual({ ok: true });
+  it('accepts any valid number, known or not', async () => {
+    expect(await prototypeAuth.requestOtp('9876500001')).toEqual({ ok: true });
+    expect(await prototypeAuth.requestOtp('9123456780')).toEqual({ ok: true });
   });
 });
 

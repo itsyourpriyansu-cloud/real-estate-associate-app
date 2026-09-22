@@ -8,19 +8,17 @@ import { space } from '@/design-system';
 import { OtpForm } from '@/features/auth/OtpForm';
 import { selectSessionKind, useAuthStore } from '@/store/authStore';
 
-/** "+919876543210" → "+91 98765 43210" */
+/** "+919000000001" → "+91 90000 00001" */
 const display = (phone: string) => phone.replace(/^(\+91)(\d{5})(\d{5})$/, '$1 $2 $3');
 
-export default function OtpScreen() {
+export default function AdminOtpScreen() {
   const router = useRouter();
-  const pendingPhone = useAuthStore((state) => state.pendingPhone);
-  const verifyOtp = useAuthStore((state) => state.verifyOtp);
+  const pendingAdminPhone = useAuthStore((state) => state.pendingAdminPhone);
+  const verifyAdminOtp = useAuthStore((state) => state.verifyAdminOtp);
   const signedOut = useAuthStore(selectSessionKind) === 'none';
 
   // Opened directly (deep link / refresh) with no number entered: go back to the start.
-  // Once the code is accepted the pending phone clears in the same update that sets the session,
-  // so only redirect while still signed out.
-  if (!pendingPhone && signedOut) return <Redirect href="/home" />;
+  if (!pendingAdminPhone && signedOut) return <Redirect href="/admin-login" />;
 
   return (
     <ScreenLayout header={<DetailHeader onBack={() => router.back()} />} gap={space[32]}>
@@ -29,10 +27,10 @@ export default function OtpScreen() {
           Enter your code
         </AppText>
         <AppText tone="secondary">
-          {pendingPhone ? `Six digits for ${display(pendingPhone)}.` : 'Six digits.'}
+          {pendingAdminPhone ? `Six digits for ${display(pendingAdminPhone)}.` : 'Six digits.'}
         </AppText>
       </View>
-      <OtpForm onVerify={verifyOtp} />
+      <OtpForm onVerify={verifyAdminOtp} />
     </ScreenLayout>
   );
 }

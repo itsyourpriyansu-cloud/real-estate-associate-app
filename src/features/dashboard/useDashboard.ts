@@ -1,16 +1,17 @@
 import { useCallback } from 'react';
 
 import { useAsyncResource } from '@/hooks/useAsyncResource';
-import { summaryRepository, userRepository } from '@/repositories';
+import { salesRepository, summaryRepository, userRepository } from '@/repositories';
 
-/** The signed-in associate and the two summary containers. */
+/** The signed-in associate, the two summary containers, and their incentive record. */
 export function useDashboard() {
   const loader = useCallback(async () => {
-    const [user, summary] = await Promise.all([
+    const [user, summary, incentive] = await Promise.all([
       userRepository.getCurrent(),
       summaryRepository.getAssociateSummary(),
+      salesRepository.getIncentive(),
     ]);
-    return { user, summary };
+    return { user, summary, incentive };
   }, []);
   return useAsyncResource(loader);
 }

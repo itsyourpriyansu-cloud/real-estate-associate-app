@@ -2,9 +2,11 @@ import { SEED_VERSION, STORAGE_KEYS } from '@/constants/prototype';
 import type { DatasetScenario } from '@/services/simulation';
 import type { KeyValueStorage } from '@/services/storage';
 
+import { buildAdmin } from './admin';
 import { buildConversations } from './conversations';
 import type { PrototypeDataset } from './dataset';
 import { leadId } from './ids';
+import { buildAssociateIncentives } from './incentives';
 import { buildLeadBlueprints, finalizeLeads } from './leads';
 import { buildNotifications } from './notifications';
 import { buildPlots } from './plots';
@@ -31,14 +33,17 @@ export interface SeedOptions {
 export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDataset {
   const t = createSeedTime(anchor);
   const users = buildUsers(t);
+  const admins = [buildAdmin()];
+  const associateIncentives = buildAssociateIncentives(t, users);
   const plots = buildPlots(t);
   const projects = buildProjects(plots);
 
-  // Empty CRM keeps inventory and the team (they are not CRM data) and removes everything
-  // associate-specific — including sales, so the dashboard's "My Sales" reads as pending.
+  // Empty CRM keeps inventory, the team and admin/org data (none of it is CRM data) and removes
+  // everything associate-specific — including sales, so the dashboard's "My Sales" reads as pending.
   if (scenario === 'EMPTY_CRM') {
     return {
       users,
+      admins,
       projects,
       plots,
       leads: [],
@@ -49,6 +54,7 @@ export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDa
       notifications: [],
       sales: [],
       salesTargets: buildSalesTargets(t),
+      associateIncentives,
     };
   }
 
@@ -74,12 +80,14 @@ export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDa
 
   return {
     users,
+    admins,
     leads,
     projects,
     plots,
     conversations,
     sales: buildSales(t, plots, picks),
     salesTargets: buildSalesTargets(t),
+    associateIncentives,
     ...crm,
   };
 }

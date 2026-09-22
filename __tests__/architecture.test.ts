@@ -64,6 +64,7 @@ describe('architecture rules', () => {
       .filter((f) => /^[A-Z]\w+Repository\.ts$/.test(f))
       .map((f) => f.replace('.ts', ''));
     expect(contracts.sort()).toEqual([
+      'AdminRepository',
       'ConversationRepository',
       'LeadRepository',
       'NotificationRepository',
@@ -175,6 +176,8 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
     'app/(public)/home.tsx',
     'app/(public)/associate-login.tsx',
     'app/(public)/otp.tsx',
+    'app/(public)/admin-login.tsx',
+    'app/(public)/admin-otp.tsx',
     // (guest): guest only
     'app/(guest)/_layout.tsx',
     'app/(guest)/guest-home.tsx',
@@ -192,6 +195,11 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
     'app/(associate)/team/[memberId].tsx',
     'app/(associate)/profile.tsx',
     'app/(associate)/settings.tsx',
+    // (admin): admin dashboard + senior associates
+    'app/(admin)/_layout.tsx',
+    'app/(admin)/admin-dashboard.tsx',
+    'app/(admin)/associates/index.tsx',
+    'app/(admin)/associates/[associateId].tsx',
     // shared by every session except signed out
     'app/projects/index.tsx',
     'app/projects/[projectId].tsx',
@@ -239,6 +247,7 @@ describe('route tree (docs/SCREEN_MAP.md)', () => {
       'access.public': ['(public)'],
       'access.guest': ['(guest)'],
       'access.associate': ['(associate)'],
+      'access.admin': ['(admin)'],
       'access.shared': [
         'projects/index',
         'projects/[projectId]',

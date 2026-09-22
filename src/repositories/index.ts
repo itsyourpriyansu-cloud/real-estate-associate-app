@@ -14,6 +14,7 @@ import { createMockRepositories } from './mock';
 const mock = createMockRepositories({ storage, clock, simulation });
 const repositories = mock.repositories;
 
+export const adminRepository = repositories.admin;
 export const leadRepository = repositories.leads;
 export const projectRepository = repositories.projects;
 export const plotRepository = repositories.plots;

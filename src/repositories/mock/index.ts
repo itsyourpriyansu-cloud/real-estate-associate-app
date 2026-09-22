@@ -3,6 +3,7 @@ import type { Clock } from '@/services/clock';
 import type { SimulationController } from '@/services/simulation';
 import type { KeyValueStorage } from '@/services/storage';
 
+import { MockAdminRepository } from './MockAdminRepository';
 import { MockContext } from './MockContext';
 import { MockConversationRepository } from './MockConversationRepository';
 import { MockDatabase } from './MockDatabase';
@@ -29,7 +30,7 @@ export interface MockRepositories {
   resetPrototypeData(): Promise<void>;
 }
 
-/** Wires the eleven mock repositories to one shared in-memory/persisted database. */
+/** Wires the twelve mock repositories to one shared in-memory/persisted database. */
 export function createMockRepositories({
   storage,
   clock,
@@ -40,6 +41,7 @@ export function createMockRepositories({
 
   return {
     repositories: {
+      admin: new MockAdminRepository(ctx),
       leads: new MockLeadRepository(ctx),
       projects: new MockProjectRepository(ctx),
       plots: new MockPlotRepository(ctx),

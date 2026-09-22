@@ -1,4 +1,4 @@
-import type { CreateBookingInput, Sale, SalesTarget } from '@/domain';
+import type { CreateBookingInput, PendingIncentive, Sale, SalesTarget } from '@/domain';
 
 /** Maps to /api/v1/sales/*. */
 export interface SalesRepository {
@@ -14,4 +14,6 @@ export interface SalesRepository {
   createBooking(input: CreateBookingInput): Promise<Sale>;
   /** GET /sales/targets — the caller's team targets, most recent month first. */
   getTargets(): Promise<SalesTarget[]>;
+  /** GET /sales/incentive — the caller's own commission/reward record, PENDING when unassigned. */
+  getIncentive(): Promise<PendingIncentive>;
 }

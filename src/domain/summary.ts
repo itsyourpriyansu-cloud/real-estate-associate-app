@@ -18,8 +18,10 @@ export const salesTotalsSchema = z.object({
 });
 export type SalesTotals = z.infer<typeof salesTotalsSchema>;
 
-const ready = <T extends z.ZodType>(value: T) => z.object({ state: z.literal('READY'), value });
-const pending = z.object({ state: z.literal('PENDING') });
+/** `{state:'READY',value}` for a figure that exists, `{state:'PENDING'}` when it does not — the
+ *  shared shape for any dashboard figure that must never be drawn as a silent zero. */
+export const ready = <T extends z.ZodType>(value: T) => z.object({ state: z.literal('READY'), value });
+export const pending = z.object({ state: z.literal('PENDING') });
 
 /**
  * A dashboard figure that may not exist yet. The wireframe shows "Pending / Not yet added" for

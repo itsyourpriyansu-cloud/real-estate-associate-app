@@ -5,22 +5,28 @@ import { z } from 'zod';
 
 import { Button } from '@/components/buttons/Button';
 import { PhoneField } from '@/components/forms/SpecialFields';
-import { PROTOTYPE_CREDENTIALS } from '@/constants/prototype';
 import { space } from '@/design-system';
-import { indianMobileSchema } from '@/services/auth';
+import { indianMobileSchema, type AuthResult } from '@/services/auth';
 import { haptics } from '@/services/haptics';
-import { useAuthStore } from '@/store/authStore';
 
 const formSchema = z.object({ phone: indianMobileSchema });
 type FormValues = z.infer<typeof formSchema>;
 
 /**
- * Phone step of the prototype login. Validation is the shared Zod schema (10-digit Indian
- * mobile), errors appear as text under the field, and the submit button shows a loading state.
- * Any valid number is accepted; the demo number is offered as a one-tap fill.
+ * Phone step of the prototype login, shared by Associate and Admin login. Validation is the
+ * shared Zod schema (10-digit Indian mobile), errors appear as text under the field, and the
+ * submit button shows a loading state. `onSubmitRequest` is which login this step starts; the
+ * demo number offered as a one-tap fill is `demoNumber`.
  */
-export function PhoneLoginForm({ onSubmitted }: { onSubmitted: () => void }) {
-  const requestOtp = useAuthStore((state) => state.requestOtp);
+export function PhoneLoginForm({
+  onSubmitRequest,
+  demoNumber,
+  onSubmitted,
+}: {
+  onSubmitRequest: (phone: string) => Promise<AuthResult>;
+  demoNumber: string;
+  onSubmitted: () => void;
+}) {
   const {
     control,
     handleSubmit,
@@ -30,7 +36,7 @@ export function PhoneLoginForm({ onSubmitted }: { onSubmitted: () => void }) {
   } = useForm<FormValues>({ resolver: zodResolver(formSchema), defaultValues: { phone: '' } });
 
   const submit = handleSubmit(async ({ phone }) => {
-    const result = await requestOtp(phone);
+    const result = await onSubmitRequest(phone);
     if (result.ok) {
       onSubmitted();
     } else {
@@ -60,11 +66,11 @@ export function PhoneLoginForm({ onSubmitted }: { onSubmitted: () => void }) {
       <View style={{ gap: space[8] }}>
         <Button label="Continue" onPress={submit} loading={isSubmitting} fullWidth />
         <Button
-          label={`Use demo number ${PROTOTYPE_CREDENTIALS.phone}`}
+          label={`Use demo number ${demoNumber}`}
           variant="tertiary"
           size="medium"
           fullWidth
-          onPress={() => setValue('phone', PROTOTYPE_CREDENTIALS.phone, { shouldValidate: true })}
+          onPress={() => setValue('phone', demoNumber, { shouldValidate: true })}
         />
       </View>
     </View>

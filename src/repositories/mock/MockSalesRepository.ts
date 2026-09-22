@@ -1,6 +1,7 @@
 import {
   createBookingInputSchema,
   type CreateBookingInput,
+  type PendingIncentive,
   type Sale,
   type SalesTarget,
 } from '@/domain';
@@ -74,6 +75,14 @@ export class MockSalesRepository implements SalesRepository {
       return data.salesTargets
         .filter((t) => t.teamName === teamName)
         .sort((a, b) => b.period.localeCompare(a.period));
+    });
+  }
+
+  getIncentive(): Promise<PendingIncentive> {
+    return this.ctx.read((data) => {
+      const me = currentAssociate(data);
+      const record = data.associateIncentives.find((i) => i.associateId === me.id);
+      return record ? { state: 'READY', value: record } : { state: 'PENDING' };
     });
   }
 }

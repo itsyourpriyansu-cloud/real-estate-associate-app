@@ -28,6 +28,7 @@ import {
   Ruler,
   Search,
   Settings,
+  Shield,
   ShoppingCart,
   SlidersHorizontal,
   TriangleAlert,
@@ -80,6 +81,7 @@ export const icons = {
   // entry paths
   guest: Compass,
   associate: Briefcase,
+  admin: Shield,
 
   // real-estate facts
   plot: Grid2x2,

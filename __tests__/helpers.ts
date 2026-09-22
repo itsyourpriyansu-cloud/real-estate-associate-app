@@ -1,7 +1,10 @@
+import type { PrototypeDataset } from '@/seed';
 import { createMockRepositories } from '@/repositories/mock';
+import { buildSeedDataset, datasetFingerprint } from '@/seed';
 import { AppClock, type ClockMode } from '@/services/clock';
 import { SimulationController, type PrototypeScenario } from '@/services/simulation';
-import { MemoryStorage } from '@/services/storage';
+import { MemoryStorage, writeJson } from '@/services/storage';
+import { STORAGE_KEYS } from '@/constants/prototype';
 
 interface TestRepositoryOptions {
   scenario?: PrototypeScenario;
@@ -21,6 +24,34 @@ export function createTestRepositories(options: TestRepositoryOptions = {}) {
   });
   const mock = createMockRepositories({ storage, clock, simulation });
   return { ...mock, storage, clock, simulation };
+}
+
+/**
+ * A repository set backed by a NORMAL-scenario dataset that has been mutated before any
+ * repository reads it — the only way to test a caller whose seed data differs from the default
+ * (e.g. a different `designation`, or a stripped-out `AssociateIncentive`), since the mock has no
+ * per-test way to choose who is signed in.
+ */
+export async function createTestRepositoriesWithSeed(mutate: (dataset: PrototypeDataset) => void) {
+  const storage = new MemoryStorage();
+  const clock = new AppClock('DEMO');
+  const anchor = clock.startOfToday();
+  const dataset = buildSeedDataset({ anchor, scenario: 'NORMAL' });
+  mutate(dataset);
+  await writeJson(storage, STORAGE_KEYS.database, {
+    fingerprint: datasetFingerprint('NORMAL', anchor),
+    dataset,
+  });
+  return createTestRepositories({ storage, clockMode: 'DEMO' });
+}
+
+/** The current associate's `designation` patched to `designation` before it is first read. */
+export function createTestRepositoriesWithDesignation(userId: string, designation: string) {
+  return createTestRepositoriesWithSeed((dataset) => {
+    const user = dataset.users.find((u) => u.id === userId);
+    if (!user) throw new Error(`seed user ${userId} missing`);
+    user.designation = designation;
+  });
 }
 
 /** Real seeded entities for component tests, read through the repository contracts (no hand-written fixtures). */

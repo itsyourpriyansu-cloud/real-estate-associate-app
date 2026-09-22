@@ -18,3 +18,9 @@ export function useMember(memberId: string) {
   }, [memberId]);
   return useAsyncResource(loader);
 }
+
+/** The signed-in associate — used where a screen needs to check `designation` before rendering. */
+export function useCurrentAssociate() {
+  const loader = useCallback(() => userRepository.getCurrent(), []);
+  return useAsyncResource(loader);
+}

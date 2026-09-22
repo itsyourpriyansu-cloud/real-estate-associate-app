@@ -1,5 +1,6 @@
 import {
   deriveNextAction,
+  type Admin,
   type Lead,
   type SiteVisit,
   type TimelineEvent,
@@ -20,6 +21,12 @@ export function currentAssociate(data: PrototypeDataset): User {
   const associate = data.users.find((u) => u.role === 'ASSOCIATE');
   if (!associate) fail('SERVER_ERROR', 'Prototype dataset has no associate');
   return associate;
+}
+
+export function currentAdmin(data: PrototypeDataset): Admin {
+  const admin = data.admins[0];
+  if (!admin) fail('SERVER_ERROR', 'Prototype dataset has no admin');
+  return admin;
 }
 
 export interface DownlineEntry {

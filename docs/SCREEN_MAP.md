@@ -9,13 +9,16 @@ The previous CRM shell (five tabs: Home · Leads · Projects · Tasks · Inbox) 
 ```text
 1 HOME (public) ──┬─ Guest Login ───────────────► 4 GUEST SCREEN ─► Our Projects
                   └─ Associate Login ─► OTP ────► 3 ASSOCIATE DASHBOARD ─► 7 sections
+
+(hidden, not on Home) /admin-login ─► OTP ──► ADMIN DASHBOARD ─► Senior Associates
 ```
 
-| Session kind | How you get it                                | Lands on      | Can reach                                                         |
-| ------------ | --------------------------------------------- | ------------- | ----------------------------------------------------------------- |
-| `none`       | first launch / signed out                     | `/home`       | `(public)` only                                                   |
-| `guest`      | **Guest Login** (no credentials)              | `/guest-home` | `(guest)`, `/projects/**`, `/plots/**`, `/prototype-controls`     |
-| `associate`  | **Associate Login** (phone + OTP)             | `/dashboard`  | `(associate)`, `/projects/**`, `/plots/**`, `/prototype-controls` |
+| Session kind | How you get it                                             | Lands on          | Can reach                                                             |
+| ------------ | ------------------------------------------------------------ | ------------------ | ---------------------------------------------------------------------- |
+| `none`       | first launch / signed out                                    | `/home`            | `(public)` only                                                       |
+| `guest`      | **Guest Login** (no credentials)                              | `/guest-home`       | `(guest)`, `/projects/**`, `/plots/**`, `/prototype-controls`         |
+| `associate`  | **Associate Login** (phone + OTP)                             | `/dashboard`        | `(associate)`, `/projects/**`, `/plots/**`, `/prototype-controls`     |
+| `admin`      | **Admin login** (phone + OTP, hidden route, exact demo number) | `/admin-dashboard`  | `(admin)`, `/projects/**`, `/plots/**`, `/prototype-controls`         |
 
 ## Route tree
 
@@ -28,7 +31,9 @@ app/
 │   ├── _layout.tsx
 │   ├── home.tsx                      /home                 1  HOME PAGE
 │   ├── associate-login.tsx           /associate-login      2  ASSOCIATE LOGIN (phone)
-│   └── otp.tsx                       /otp                     OTP step for Associate Login
+│   ├── otp.tsx                       /otp                     OTP step for Associate Login
+│   ├── admin-login.tsx               /admin-login             HIDDEN — admin login (phone), not linked from home.tsx
+│   └── admin-otp.tsx                 /admin-otp               OTP step for Admin Login
 ├── (guest)/                          guard: kind === 'guest'
 │   ├── _layout.tsx
 │   └── guest-home.tsx                /guest-home           4  GUEST SCREEN
@@ -46,6 +51,12 @@ app/
 │   ├── team/[memberId].tsx           /team/:memberId
 │   ├── profile.tsx                   /profile
 │   └── settings.tsx                  /settings
+├── (admin)/                          guard: kind === 'admin'
+│   ├── _layout.tsx
+│   ├── admin-dashboard.tsx           /admin-dashboard         Associate counts; way in to Senior Associates
+│   └── associates/
+│       ├── index.tsx                 /associates              Every associate, filter by seniority
+│       └── [associateId].tsx         /associates/:associateId Promote; set commission rate + reward target
 ├── projects/                         guard: kind !== 'none'
 │   ├── index.tsx                     /projects                1. OUR PROJECTS
 │   ├── [projectId].tsx               /projects/:projectId
@@ -76,7 +87,7 @@ Their **route files were removed from `app/`**; the feature code, components, re
 
 ## Navigation model
 
-- **A floating dock, not a tab bar.** Signed-in associates get a charcoal pill dock — Home (`/dashboard`) · Projects (`/projects`) · Team (`/team`) · Profile (`/profile`) — shown **only on those four top-level routes** (`dockKeyFor`, tested); pushed screens have a back button. The seven dashboard rows remain the primary navigation (visible, not hidden). The round menu button in the header opens a **menu sheet** for secondary items: Profile · Settings · Prototype controls · Sign out. No drawer dependency was added.
+- **A floating dock, not a tab bar.** Signed-in associates get a charcoal pill dock — Home (`/dashboard`) · Projects (`/projects`) · Team (`/team`) · Profile (`/profile`) — shown **only on those four top-level routes** (`dockKeyFor`, tested); pushed screens have a back button. The seven dashboard rows remain the primary navigation (visible, not hidden). The round menu button in the header opens a **menu sheet** for secondary items: Profile · Settings · Prototype controls · Sign out. No drawer dependency was added. **Admin gets no dock** — `showDock` stays keyed to `access.associate` only; the admin dashboard navigates with a single nav row and a back button, proportionate to its two screens.
 - **Guarding:** every route group except `(public)` is inside `Stack.Protected` keyed on the session kind; `(public)` is only reachable signed out. Signing in/out flips the guards and Expo Router falls back to `index`, which redirects by kind. Tested (`__tests__/architecture.test.ts`, `__tests__/session.test.ts`).
 - Detail routes push onto the root stack and return to the previous scroll/filter state.
 
@@ -84,8 +95,9 @@ Their **route files were removed from `app/`**; the feature code, components, re
 
 | Route                                          | Screen (`src/features/…`)                                            | Reads (contracts)                                                      | Primary job                                                     |
 | ---------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `/home`                                        | `landing/PublicHome`                                                 | `SummaryRepository.getPublicSummary`                                   | Public numbers; choose Guest / Associate / Simple; Login        |
-| `/associate-login`, `/simple-login`, `/otp`    | `auth/LoginScreen`, `OtpForm`                                        | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; a number on the wrong login gets an inline error   |
+| `/home`                                        | `landing/PublicHome`                                                 | `SummaryRepository.getPublicSummary`                                   | Public numbers; choose Guest or Associate; Login                |
+| `/associate-login`, `/otp`                     | `auth/LoginScreen`, `OtpForm`                                        | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; a malformed number or wrong code is an inline error|
+| `/admin-login`, `/admin-otp` (hidden)          | `auth/AdminLoginScreen`, `OtpForm`                                   | — (`prototypeAuth`, `authStore`)                                       | Phone → OTP; only the exact demo admin number is accepted       |
 | `/guest-home`                                  | `guest/GuestHome`                                                    | —                                                                      | One row: Our Projects; way back                                 |
 | `/projects`                                    | `projects/ProjectsScreen`                                            | `ProjectRepository.list`                                               | Browse projects; filter by status                               |
 | `/projects/:id`                                | `projects/ProjectDetailScreen`                                       | `getById`, `getInventorySummary`                                       | Facts, price range, inventory, highlights, amenities            |
@@ -96,8 +108,10 @@ Their **route files were removed from `app/`**; the feature code, components, re
 | `/price-calculator`                            | `calculator/PriceCalculatorScreen`                                   | `ProjectRepository`, `PlotRepository`, `calculatePlotCost` (domain)    | Cost preview (never a quotation)                                |
 | `/site-visits`, `/site-visits/:id`             | `visits/SiteVisitsScreen`, `VisitDetailScreen`                       | `VisitRepository.list({associateIds})`, leads, projects, plots         | Visit log, filters, details, outcome                            |
 | `/team-sales`                                  | `sales/TeamSalesScreen`                                              | `SalesRepository.listTeam`, `getTargets`                               | Month vs target (hatched progress), top sellers, sales          |
-| `/team`, `/team/:id`, `/team/add`              | `team/MyTeamScreen`, `MemberDetailScreen`, `AddMemberScreen`         | `TeamRepository`                                                       | Downline by level, member detail, add a member                  |
+| `/team`, `/team/:id`, `/team/add`              | `team/MyTeamScreen`, `MemberDetailScreen`, `AddMemberScreen`         | `TeamRepository`                                                       | Downline by level, member detail, add a member (**Senior Associates only** — `addMember` rejects everyone else) |
 | `/profile`, `/settings`, `/prototype-controls` | `profile/ProfileScreen`, `SettingsScreen`, `PrototypeControlsScreen` | `UserRepository.getCurrent`, stores                                    | Account, preferences, scenarios and demo clock, reset, sign out |
+| `/admin-dashboard`                             | `admin/AdminDashboardScreen`                                         | `AdminRepository.getCurrentAdmin`, `listAssociates`                    | Associate/senior counts; way in to Senior Associates             |
+| `/associates`, `/associates/:id`               | `admin/AssociatesScreen`, `AssociateDetailScreen`                    | `AdminRepository`                                                      | Filter by seniority; promote; set commission rate + reward target|
 
 `/profile` is the reference for the pattern: screen → `useCurrentUser` → `userRepository` → mock → seed, with a test for its repository-error state.
 

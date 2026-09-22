@@ -1,30 +1,38 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { STORAGE_KEYS } from '@/constants/prototype';
+import { DEFAULT_COUNTRY_CODE, PROTOTYPE_ADMIN_PHONE, STORAGE_KEYS } from '@/constants/prototype';
 import { prototypeAuth, type AuthResult } from '@/services/auth';
 import { storage } from '@/services/storage';
 
 /**
- * Who is using the app. `none` sees only the public Home and the login screen; `guest` sees Our
- * Projects; `associate` sees the dashboard. It is session state only — a kind and a phone number,
- * never a user record. Profile data comes from `UserRepository`.
+ * Who is using the app. `none` sees only the public Home and the login screens; `guest` sees Our
+ * Projects; `associate` sees the dashboard; `admin` sees the admin dashboard (reached only via a
+ * hidden route, never advertised on the public Home). It is session state only — a kind and a
+ * phone number where relevant, never a user record. Profile data comes from `UserRepository`.
  */
 export type Session =
   | { kind: 'none' }
   | { kind: 'guest' }
-  | { kind: 'associate'; phone: string };
+  | { kind: 'associate'; phone: string }
+  | { kind: 'admin' };
 
 export type SessionKind = Session['kind'];
 
 const SIGNED_OUT: Session = { kind: 'none' };
+const ADMIN_PHONE_E164 = `${DEFAULT_COUNTRY_CODE}${PROTOTYPE_ADMIN_PHONE}`;
 
 interface AuthState {
   session: Session;
-  /** Phone awaiting OTP verification. Not persisted. */
+  /** Phone awaiting associate-login OTP verification. Not persisted. */
   pendingPhone: string | null;
+  /** Phone awaiting admin-login OTP verification. Not persisted. */
+  pendingAdminPhone: string | null;
   requestOtp: (phoneInput: string) => Promise<AuthResult>;
   verifyOtp: (code: string) => Promise<AuthResult>;
+  /** Admin login: same fixed demo OTP, but only the exact demo admin number is accepted. */
+  requestAdminOtp: (phoneInput: string) => Promise<AuthResult>;
+  verifyAdminOtp: (code: string) => Promise<AuthResult>;
   /** Guest Login: no credentials, browse Our Projects. */
   continueAsGuest: () => void;
   signOut: () => void;
@@ -50,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       session: SIGNED_OUT,
       pendingPhone: null,
+      pendingAdminPhone: null,
 
       async requestOtp(phoneInput) {
         const result = await prototypeAuth.requestOtp(phoneInput);
@@ -69,9 +78,29 @@ export const useAuthStore = create<AuthState>()(
         return result;
       },
 
+      async requestAdminOtp(phoneInput) {
+        const normalized = prototypeAuth.normalizePhone(phoneInput);
+        if (normalized !== ADMIN_PHONE_E164) return { ok: false, error: 'INVALID_PHONE' };
+        const result = await prototypeAuth.requestOtp(phoneInput);
+        if (result.ok) {
+          set({ pendingAdminPhone: normalized });
+        }
+        return result;
+      },
+
+      async verifyAdminOtp(code) {
+        const { pendingAdminPhone } = get();
+        if (!pendingAdminPhone) return { ok: false, error: 'NO_PENDING_PHONE' };
+        const result = await prototypeAuth.verifyOtp(code);
+        if (result.ok) {
+          set({ session: { kind: 'admin' }, pendingAdminPhone: null });
+        }
+        return result;
+      },
+
       continueAsGuest: () => set({ session: { kind: 'guest' }, pendingPhone: null }),
 
-      signOut: () => set({ session: SIGNED_OUT, pendingPhone: null }),
+      signOut: () => set({ session: SIGNED_OUT, pendingPhone: null, pendingAdminPhone: null }),
     }),
     {
       name: STORAGE_KEYS.auth,

@@ -30,7 +30,13 @@ import {
   icons,
   useDockClearance,
 } from '@/components';
+import {
+  COMMISSION_RATE_SENIOR_ASSOCIATE,
+  REWARD_PLOT_TARGET,
+  SENIOR_ASSOCIATE_DESIGNATION,
+} from '@/constants/prototype';
 import { layout } from '@/design-system';
+import { commissionFor, rewardProgressFor } from '@/features/dashboard/dashboardSelectors';
 import { DOCK_ITEMS, dockHref, dockKeyFor } from '@/features/navigation/dock';
 import {
   availablePeriods,
@@ -493,5 +499,49 @@ describe('sales selectors (pure)', () => {
     const empty = performanceFor('2024-01', [], []);
     expect(empty).toMatchObject({ target: null, areaProgress: null, amountProgress: null });
     expect(empty.totals).toEqual({ count: 0, areaSqYd: 0, amount: 0 });
+  });
+});
+
+describe('dashboard selectors (pure)', () => {
+  it('pays commission only to a senior associate, at the given rate', () => {
+    const sales = { count: 6, areaSqYd: 1744, amount: 32_878_000 };
+    expect(commissionFor(SENIOR_ASSOCIATE_DESIGNATION, COMMISSION_RATE_SENIOR_ASSOCIATE, sales)).toEqual({
+      eligible: true,
+      rate: 0.05,
+      amount: 1_643_900,
+    });
+    expect(commissionFor('Associate', COMMISSION_RATE_SENIOR_ASSOCIATE, sales)).toEqual({
+      eligible: false,
+      rate: 0.05,
+      amount: 0,
+    });
+    expect(commissionFor(undefined, COMMISSION_RATE_SENIOR_ASSOCIATE, sales)).toMatchObject({
+      eligible: false,
+      amount: 0,
+    });
+  });
+
+  it('tracks progress toward the foreign-trip reward and flips to achieved at the target', () => {
+    expect(rewardProgressFor({ count: 0, areaSqYd: 0, amount: 0 }, REWARD_PLOT_TARGET)).toEqual({
+      plotsSold: 0,
+      target: REWARD_PLOT_TARGET,
+      remaining: REWARD_PLOT_TARGET,
+      achieved: false,
+    });
+    expect(rewardProgressFor({ count: 4, areaSqYd: 0, amount: 0 }, REWARD_PLOT_TARGET)).toEqual({
+      plotsSold: 4,
+      target: REWARD_PLOT_TARGET,
+      remaining: 1,
+      achieved: false,
+    });
+    expect(rewardProgressFor({ count: 5, areaSqYd: 0, amount: 0 }, REWARD_PLOT_TARGET)).toMatchObject({
+      remaining: 0,
+      achieved: true,
+    });
+    // Selling past the target never goes negative or un-achieves the reward.
+    expect(rewardProgressFor({ count: 9, areaSqYd: 0, amount: 0 }, REWARD_PLOT_TARGET)).toMatchObject({
+      remaining: 0,
+      achieved: true,
+    });
   });
 });

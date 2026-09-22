@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 import {
+  adminSchema,
   appNotificationSchema,
+  associateIncentiveSchema,
   conversationSchema,
   leadSchema,
   plotSchema,
@@ -21,6 +23,7 @@ import {
  */
 export const prototypeDatasetSchema = z.object({
   users: z.array(userSchema),
+  admins: z.array(adminSchema),
   leads: z.array(leadSchema),
   timeline: z.array(timelineEventSchema),
   projects: z.array(projectSchema),
@@ -31,6 +34,7 @@ export const prototypeDatasetSchema = z.object({
   notifications: z.array(appNotificationSchema),
   sales: z.array(saleSchema),
   salesTargets: z.array(salesTargetSchema),
+  associateIncentives: z.array(associateIncentiveSchema),
 });
 
 export type PrototypeDataset = z.infer<typeof prototypeDatasetSchema>;

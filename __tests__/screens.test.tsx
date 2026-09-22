@@ -88,6 +88,34 @@ describe('Guest hub', () => {
 });
 
 describe('Dashboard', () => {
+  it('shows the senior-associate commission and the foreign-trip reward, unlocked at 6 of 5 plots', async () => {
+    await show(<DashboardScreen />);
+    await screen.findByText('My performance');
+    expect(screen.getByLabelText(/^My commission, ₹/)).toBeTruthy();
+    expect(screen.getByText('5% of total sales')).toBeTruthy();
+
+    expect(screen.getByText('Sales reward')).toBeTruthy();
+    expect(screen.getByText('Unlocked')).toBeTruthy();
+    expect(
+      screen.getByRole('progressbar', { name: 'Foreign trip progress, 6 of 5 plots' }),
+    ).toBeTruthy();
+    expect(screen.getByText('Target reached')).toBeTruthy();
+    expect(
+      screen.getByText('You’ve reached the plot target — the foreign trip reward is yours.'),
+    ).toBeTruthy();
+  });
+
+  it('reads Pending for the commission, and shows reward progress with none achieved, when nothing is sold (Empty CRM)', async () => {
+    usePrototypeStore.getState().setScenario('EMPTY_CRM');
+    await show(<DashboardScreen />);
+    expect(await screen.findByLabelText('My commission, pending, not yet added')).toBeTruthy();
+    expect(
+      screen.getByRole('progressbar', { name: 'Foreign trip progress, 0 of 5 plots' }),
+    ).toBeTruthy();
+    expect(screen.getByText('5 to go')).toBeTruthy();
+    expect(screen.queryByText('Unlocked')).toBeNull();
+  });
+
   it('shows the hero figure, team numbers, performance and the seven sections', async () => {
     await show(<DashboardScreen />);
     expect(await screen.findByText('Total registered sq. yards')).toBeTruthy();

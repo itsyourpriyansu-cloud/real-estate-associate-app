@@ -87,7 +87,7 @@ Inter, **three weights only** (Regular / Medium / SemiBold — there is no Bold)
 
 ### The icon vocabulary
 
-`icons.<meaning>` (`src/components/primitives/icons.ts`) is the only way a screen names an icon. Every meaning has exactly one glyph and no two meanings share one (tested): chrome (`home menu back forward close search filter notifications support profile settings signOut`), states (`check verified info warning alert show hide`), the seven sections (`projects booking calculator siteVisits teamSales addMember myTeam`), entry paths (`guest associate`) and real-estate facts (`plot area price location visit phone mail gallery`). Screens do not import lucide directly.
+`icons.<meaning>` (`src/components/primitives/icons.ts`) is the only way a screen names an icon. Every meaning has exactly one glyph and no two meanings share one (tested): chrome (`home menu back forward close search filter notifications support profile settings signOut`), states (`check verified info warning alert show hide`), the seven sections (`projects booking calculator siteVisits teamSales addMember myTeam`), entry paths (`guest associate admin`) and real-estate facts (`plot area price location visit phone mail gallery`). Screens do not import lucide directly.
 
 ### Brand
 

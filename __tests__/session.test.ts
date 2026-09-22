@@ -2,13 +2,14 @@ import { PROTOTYPE_ACCOUNTS } from '@/constants/prototype';
 import { accessFor, landingFor, type SessionAccess } from '@/features/auth/sessionAccess';
 import type { SessionKind } from '@/store/authStore';
 
-const kinds: SessionKind[] = ['none', 'guest', 'associate'];
+const kinds: SessionKind[] = ['none', 'guest', 'associate', 'admin'];
 
 describe('session → route group access (guard matrix)', () => {
   const expected: Record<SessionKind, (keyof SessionAccess)[]> = {
     none: ['public'],
     guest: ['guest', 'shared'],
     associate: ['associate', 'shared'],
+    admin: ['admin', 'shared'],
   };
 
   it.each(kinds)('%s sees exactly its own groups', (kind) => {
@@ -35,13 +36,20 @@ describe('landing screen per session', () => {
     ['none', '/home'],
     ['guest', '/guest-home'],
     ['associate', '/dashboard'],
+    ['admin', '/admin-dashboard'],
   ] as const)('%s lands on %s', (kind, href) => {
     expect(landingFor(kind)).toBe(href);
   });
 
   it('lands each session on a group that session can see', () => {
     const groupOf = (href: string): keyof SessionAccess =>
-      href === '/home' ? 'public' : href === '/guest-home' ? 'guest' : 'associate';
+      href === '/home'
+        ? 'public'
+        : href === '/guest-home'
+          ? 'guest'
+          : href === '/admin-dashboard'
+            ? 'admin'
+            : 'associate';
     for (const kind of kinds) {
       expect(accessFor(kind)[groupOf(String(landingFor(kind)))]).toBe(true);
     }

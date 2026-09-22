@@ -9,7 +9,7 @@ Run everything: `npm run validate` (typecheck + lint + tests), then `npm run doc
 - [x] **TypeScript strict** — `npm run typecheck`, typed routes active.
 - [x] **ESLint** — `--max-warnings=0` (includes the React-Compiler rules from `eslint-config-expo`).
 - [x] **Prettier** — `npm run format:check`.
-- [x] **Jest** — 449 tests, 13 suites (screens · Vara components · architecture · session guard matrix · flow: team/sales/summary/pricing · components · design-system · format/selectors · previews · repositories · seed · services · stores).
+- [x] **Jest** — 470 tests, 13 suites (screens · Vara components · architecture · session guard matrix · flow: team/sales/summary/pricing/admin · components · design-system · format/selectors · previews · repositories · seed · services · stores).
 - [x] **Expo Doctor** — 21/21; `expo install --check` clean.
 - [x] **Production bundles** — Android + iOS (Hermes), `__DEV__` false; only three Inter files ship.
 - [ ] **Android build launches on a device/emulator** — _not verified._
@@ -81,14 +81,23 @@ Answered from the rendered screenshots (a designer's eye, not a metric):
 
 ## App-flow restructure (route tree, session, contracts)
 
-- [x] **Session guards** — none / guest / associate against every route group, plus the landing per session (`session.test.ts`).
+- [x] **Session guards** — none / guest / associate / admin against every route group, plus the landing per session (`session.test.ts`).
 - [x] **Route tree** — every route file exists, the CRM route files are gone, every top-level route is registered in the root layout (`architecture.test.ts`).
-- [x] **Invalid phone / OTP** — a malformed number and a wrong code show an inline error and set no pending phone (`stores.test.tsx`, `services.test.ts`, browser walk). Simple Login (client) was removed; there is only one login now, so there is no "wrong login" case to test.
+- [x] **Invalid phone / OTP** — a malformed number and a wrong code show an inline error and set no pending phone (`stores.test.tsx`, `services.test.ts`, browser walk). Associate login accepts any valid number (there is only one associate login, so no "wrong login" case); admin login additionally rejects any number that isn't the exact demo admin number.
 - [x] **Persisted session migration** — a v1 `{status, phone}` session becomes an associate session; signed-out stays signed out (`stores.test.tsx`).
 - [x] **Team / Sales / Summary** — downline levels, add member (default sponsor, deeper sponsor, duplicate, outside sponsor), booking side effects, pending states, offline (`flow.test.ts`).
 - [x] **Browser walk (Chrome 390x844, `expo start --web`)** — Home to Guest / Associate; OTP; Dashboard to all 7 sections plus Profile and Settings and back; sign out; a guest session survives a reload; **0 console errors**.
 - [x] **Production bundle** — `expo export --platform android` succeeds with the new tree.
 - [ ] **Not verified:** a device/emulator run, Expo Doctor after the restructure, an iOS bundle.
+- [x] **Senior-associate commission and the foreign-trip reward, now admin-assigned** — pure selector math (`vara-components.test.tsx`), Dashboard shows the commission tile and reward progress/"Unlocked" for the demo senior associate (sourced from their seeded `AssociateIncentive`, not a flat constant) and reads Pending under Empty CRM (`screens.test.tsx`).
+
+## Admin surface
+
+- [x] **Hidden admin login** — `/admin-login` is reachable by direct URL and not linked from `/home`; only the exact demo admin number is accepted (unlike associate login's "any valid number"), the wrong number or a malformed one is rejected without a pending phone (`authStore`/`AdminLoginScreen`).
+- [x] **AdminRepository** — `listAssociates` (role-filtered), `promoteToSeniorAssociate` (idempotent, `NOT_FOUND` for an unknown id), `assignIncentive` (upserts, `INVALID_INPUT` for a non-senior target, `NOT_FOUND` for an unknown associate) — `flow.test.ts`.
+- [x] **`SalesRepository.getIncentive`** — `READY` with the seeded values for the demo senior associate, `PENDING` once their record is removed — `flow.test.ts`.
+- [x] **Add Team Member gated to Senior Associates** — `MockTeamRepository.addMember` rejects `INVALID_INPUT` for a non-senior caller (`flow.test.ts`); the Dashboard's "Add Team Member" row and `AddMemberScreen` itself are hidden/blocked for a non-senior associate (verified by code inspection — the same `isSeniorAssociate` gate already proven correct for the commission/reward panels — and by browser walk, not by an automated screen-render test).
+- [ ] **Known gap, by design:** no automated screen-render test proves the Add Team Member gate is invisible to a non-senior associate. `screens.test.tsx` renders against the app's single shared `@/repositories` singleton with no seam to swap which user is "current," and there is no demote capability to make the demo associate non-senior for a test. The repository-level rejection is the real enforcement and is tested; this is a manual-QA item until the test harness gains dependency injection.
 
 ## Vara light theme, brand and screens
 

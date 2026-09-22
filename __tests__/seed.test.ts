@@ -420,6 +420,8 @@ describe('seed scenarios', () => {
     expect(empty.projects).toHaveLength(4);
     expect(empty.users).toEqual(build('NORMAL').users); // the team is not CRM data
     expect(empty.sales).toEqual([]);
+    expect(empty.admins).toEqual(build('NORMAL').admins); // admin/org data is not CRM data
+    expect(empty.associateIncentives).toEqual(build('NORMAL').associateIncentives);
   });
 
   it('re-anchors to a different day without changing shape (real-clock mode)', () => {

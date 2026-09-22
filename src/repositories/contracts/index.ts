@@ -1,3 +1,4 @@
+import type { AdminRepository } from './AdminRepository';
 import type { ConversationRepository } from './ConversationRepository';
 import type { LeadRepository } from './LeadRepository';
 import type { NotificationRepository } from './NotificationRepository';
@@ -10,6 +11,7 @@ import type { TeamRepository } from './TeamRepository';
 import type { UserRepository } from './UserRepository';
 import type { VisitRepository } from './VisitRepository';
 
+export * from './AdminRepository';
 export * from './ConversationRepository';
 export * from './LeadRepository';
 export * from './NotificationRepository';
@@ -25,6 +27,7 @@ export * from './errors';
 
 /** The full set the app composes. Swapping mock → API means providing another `Repositories`. */
 export interface Repositories {
+  admin: AdminRepository;
   leads: LeadRepository;
   projects: ProjectRepository;
   plots: PlotRepository;

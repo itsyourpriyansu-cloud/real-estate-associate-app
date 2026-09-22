@@ -9,7 +9,9 @@ import {
   AppText,
   Button,
   DetailHeader,
+  EmptyState,
   InlineError,
+  LoadingState,
   PhoneField,
   Reveal,
   ScreenLayout,
@@ -20,13 +22,13 @@ import {
   useToast,
   type SelectOption,
 } from '@/components';
-import { DEFAULT_COUNTRY_CODE } from '@/constants/prototype';
+import { DEFAULT_COUNTRY_CODE, SENIOR_ASSOCIATE_DESIGNATION } from '@/constants/prototype';
 import { space } from '@/design-system';
 import { isRepositoryError, teamRepository } from '@/repositories';
 import { indianMobileSchema } from '@/services/auth';
 import { haptics } from '@/services/haptics';
 
-import { useTeam } from './useTeam';
+import { useCurrentAssociate, useTeam } from './useTeam';
 
 const ME = 'me';
 
@@ -46,6 +48,7 @@ export function AddMemberScreen() {
   const router = useRouter();
   const toast = useToast();
   const team = useTeam();
+  const currentAssociate = useCurrentAssociate();
   const [formError, setFormError] = useState<string | undefined>();
 
   const {
@@ -94,6 +97,34 @@ export function AddMemberScreen() {
       }
     }
   });
+
+  if (currentAssociate.status === 'loading') {
+    return (
+      <ScreenLayout
+        edges={['top', 'bottom']}
+        header={<DetailHeader title="Add team member" onBack={() => router.back()} />}
+      >
+        <LoadingState variant="cards" count={1} />
+      </ScreenLayout>
+    );
+  }
+
+  if (currentAssociate.data?.designation !== SENIOR_ASSOCIATE_DESIGNATION) {
+    return (
+      <ScreenLayout
+        edges={['top', 'bottom']}
+        header={<DetailHeader title="Add team member" onBack={() => router.back()} />}
+      >
+        <EmptyState
+          icon={icons.addMember}
+          title="Senior Associates only"
+          description="Adding team members is limited to Senior Associates. Ask your admin if you think this is a mistake."
+          actionLabel="Back to dashboard"
+          onAction={() => router.replace('/dashboard')}
+        />
+      </ScreenLayout>
+    );
+  }
 
   return (
     <ScreenLayout

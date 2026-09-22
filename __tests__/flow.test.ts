@@ -1,4 +1,4 @@
-import { PROTOTYPE_ACCOUNTS } from '@/constants/prototype';
+import { PROTOTYPE_ACCOUNTS, SENIOR_ASSOCIATE_DESIGNATION } from '@/constants/prototype';
 import {
   associateSummarySchema,
   calculatePlotCost,
@@ -8,12 +8,17 @@ import {
   type Plot,
 } from '@/domain';
 import { RepositoryError } from '@/repositories';
+import { ASSOCIATE_ID } from '@/seed/ids';
 import { buildSeedDataset, type PrototypeDataset } from '@/seed';
 import { demoDayStart } from '@/services/clock';
 import type { DatasetScenario } from '@/services/simulation';
 import { MemoryStorage } from '@/services/storage';
 
-import { createTestRepositories } from './helpers';
+import {
+  createTestRepositories,
+  createTestRepositoriesWithDesignation,
+  createTestRepositoriesWithSeed,
+} from './helpers';
 
 const build = (scenario: DatasetScenario = 'NORMAL'): PrototypeDataset =>
   buildSeedDataset({ anchor: demoDayStart(), scenario });
@@ -209,6 +214,17 @@ describe('TeamRepository', () => {
     expect(await r.team.listMyTeam()).toHaveLength(9);
   });
 
+  it('rejects adding a member when the caller is not a Senior Associate', async () => {
+    const { repositories: r } = await createTestRepositoriesWithDesignation(
+      ASSOCIATE_ID,
+      'Associate',
+    );
+    await rejectsWith(
+      r.team.addMember({ fullName: 'Blocked Buyer', phone: '+919811100005' }),
+      'INVALID_INPUT',
+    );
+  });
+
   it('persists a new member across an app restart', async () => {
     const storage = new MemoryStorage();
     await createTestRepositories({ storage }).repositories.team.addMember({
@@ -302,6 +318,97 @@ describe('SalesRepository', () => {
     );
     expect((await r.plots.getById(available.id))?.status).toBe('AVAILABLE');
     expect(await r.sales.listMine()).toHaveLength(salesBefore);
+  });
+
+  it('reads the caller’s own incentive, READY for the seeded senior associate', async () => {
+    const { repositories: r } = createTestRepositories();
+    expect(await r.sales.getIncentive()).toEqual({
+      state: 'READY',
+      value: expect.objectContaining({
+        associateId: ME,
+        commissionRate: 0.05,
+        rewardPlotTarget: 5,
+      }),
+    });
+  });
+
+  it('reads PENDING once the caller has no incentive record', async () => {
+    const { repositories: r } = await createTestRepositoriesWithSeed((dataset) => {
+      dataset.associateIncentives = dataset.associateIncentives.filter(
+        (i) => i.associateId !== ME,
+      );
+    });
+    expect(await r.sales.getIncentive()).toEqual({ state: 'PENDING' });
+  });
+});
+
+describe('AdminRepository', () => {
+  it('lists only ASSOCIATE-role users', async () => {
+    const { repositories: r } = createTestRepositories();
+    const associates = await r.admin.listAssociates();
+    expect(associates.length).toBeGreaterThan(0);
+    expect(associates.every((a) => a.role === 'ASSOCIATE')).toBe(true);
+    expect(associates.some((a) => a.id === LEAD)).toBe(false); // TEAM_LEAD excluded
+  });
+
+  it('promotes an associate to Senior Associate, and is idempotent', async () => {
+    const { repositories: r } = createTestRepositories();
+    const before = await r.admin.listAssociates();
+    const junior = before.find((a) => a.designation !== SENIOR_ASSOCIATE_DESIGNATION);
+    if (!junior) throw new Error('no junior associate in seed');
+
+    const promoted = await r.admin.promoteToSeniorAssociate(junior.id);
+    expect(promoted.designation).toBe(SENIOR_ASSOCIATE_DESIGNATION);
+
+    const again = await r.admin.promoteToSeniorAssociate(junior.id);
+    expect(again.designation).toBe(SENIOR_ASSOCIATE_DESIGNATION);
+  });
+
+  it('rejects promoting an unknown associate', async () => {
+    const { repositories: r } = createTestRepositories();
+    await rejectsWith(r.admin.promoteToSeniorAssociate('nope'), 'NOT_FOUND');
+  });
+
+  it('assigns an incentive to a senior associate, and upserts on a second call', async () => {
+    const { repositories: r } = createTestRepositories();
+    const assigned = await r.admin.assignIncentive({
+      associateId: ME,
+      commissionRate: 0.1,
+      rewardPlotTarget: 8,
+    });
+    expect(assigned).toMatchObject({ associateId: ME, commissionRate: 0.1, rewardPlotTarget: 8 });
+    expect(await r.admin.getIncentiveFor(ME)).toMatchObject({
+      id: assigned.id,
+      commissionRate: 0.1,
+      rewardPlotTarget: 8,
+    });
+
+    const updated = await r.admin.assignIncentive({
+      associateId: ME,
+      commissionRate: 0.07,
+      rewardPlotTarget: 6,
+    });
+    expect(updated.id).toBe(assigned.id); // same record, not a duplicate
+    expect(await r.admin.getIncentiveFor(ME)).toMatchObject({
+      commissionRate: 0.07,
+      rewardPlotTarget: 6,
+    });
+  });
+
+  it('rejects an incentive for an associate who is not yet senior, and for an unknown associate', async () => {
+    const { repositories: r } = createTestRepositories();
+    const before = await r.admin.listAssociates();
+    const junior = before.find((a) => a.designation !== SENIOR_ASSOCIATE_DESIGNATION);
+    if (!junior) throw new Error('no junior associate in seed');
+
+    await rejectsWith(
+      r.admin.assignIncentive({ associateId: junior.id, commissionRate: 0.05, rewardPlotTarget: 5 }),
+      'INVALID_INPUT',
+    );
+    await rejectsWith(
+      r.admin.assignIncentive({ associateId: 'nope', commissionRate: 0.05, rewardPlotTarget: 5 }),
+      'NOT_FOUND',
+    );
   });
 });
 

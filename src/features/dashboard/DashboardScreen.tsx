@@ -11,20 +11,25 @@ import {
   LoadingState,
   NavPanel,
   NavRow,
+  ProgressBar,
   ResourceBoundary,
   Reveal,
   ScreenLayout,
   StatGrid,
   StatTile,
+  StatusChip,
   SummaryPanel,
   icons,
+  statusGlyph,
 } from '@/components';
+import { SENIOR_ASSOCIATE_DESIGNATION } from '@/constants/prototype';
 import { space } from '@/design-system';
 import { useNow } from '@/hooks/useNow';
 import { useAuthStore } from '@/store/authStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { firstName, formatInr, greetingFor, groupIndian } from '@/utils/format';
 
+import { commissionFor, rewardProgressFor } from './dashboardSelectors';
 import { useDashboard } from './useDashboard';
 
 /** 3 · ASSOCIATE DASHBOARD — the numbers that matter, then the seven places an associate goes. */
@@ -57,8 +62,24 @@ export function DashboardScreen() {
         subject="your dashboard"
         loading={<LoadingState variant="cards" count={2} />}
       >
-        {({ summary }) => {
+        {({ summary, incentive }) => {
           const teamSales = summary.teamTotalSales;
+          const isSeniorAssociate = user?.designation === SENIOR_ASSOCIATE_DESIGNATION;
+          const commissionPending =
+            incentive.state === 'PENDING' || summary.mySales.state === 'PENDING';
+          const commission =
+            isSeniorAssociate && incentive.state === 'READY' && summary.mySales.state === 'READY'
+              ? commissionFor(user?.designation, incentive.value.commissionRate, summary.mySales.value)
+              : null;
+          const reward =
+            incentive.state === 'READY'
+              ? rewardProgressFor(
+                  summary.mySales.state === 'READY'
+                    ? summary.mySales.value
+                    : { count: 0, areaSqYd: 0, amount: 0 },
+                  incentive.value.rewardPlotTarget,
+                )
+              : null;
           return (
             <>
               <Reveal index={0}>
@@ -129,12 +150,54 @@ export function DashboardScreen() {
                         summary.teamSiteVisits.state === 'READY' ? 'Recorded visits' : undefined
                       }
                     />
+                    {isSeniorAssociate ? (
+                      <StatTile
+                        label="My commission"
+                        pending={commissionPending}
+                        value={commission ? formatInr(commission.amount) : undefined}
+                        masked={hidden ? '••••' : undefined}
+                        caption={
+                          commission ? `${Math.round(commission.rate * 100)}% of total sales` : undefined
+                        }
+                      />
+                    ) : null}
                   </StatGrid>
                 </SummaryPanel>
               </Reveal>
 
-              <View style={{ gap: space[12] }}>
+              {isSeniorAssociate ? (
                 <Reveal index={3}>
+                  <SummaryPanel
+                    title="Sales reward"
+                    right={
+                      reward?.achieved ? (
+                        <StatusChip label="Unlocked" tone="success" icon={statusGlyph('check')} />
+                      ) : undefined
+                    }
+                  >
+                    {reward ? (
+                      <>
+                        <ProgressBar
+                          value={reward.plotsSold / reward.target}
+                          label={`Foreign trip progress, ${reward.plotsSold} of ${reward.target} plots`}
+                          startCaption={`${reward.plotsSold} ${reward.plotsSold === 1 ? 'plot' : 'plots'} sold`}
+                          endCaption={reward.achieved ? 'Target reached' : `${reward.remaining} to go`}
+                        />
+                        <AppText tone="secondary">
+                          {reward.achieved
+                            ? 'You’ve reached the plot target — the foreign trip reward is yours.'
+                            : `Sell ${reward.remaining} more ${reward.remaining === 1 ? 'plot' : 'plots'} to earn a foreign trip (target set by your admin).`}
+                        </AppText>
+                      </>
+                    ) : (
+                      <StatTile label="Reward target" pending />
+                    )}
+                  </SummaryPanel>
+                </Reveal>
+              ) : null}
+
+              <View style={{ gap: space[12] }}>
+                <Reveal index={4}>
                   <AppText variant="headingSM" header>
                     Explore
                   </AppText>
@@ -170,12 +233,14 @@ export function DashboardScreen() {
                     subtitle="Team performance, targets"
                     onPress={() => router.push('/team-sales')}
                   />
-                  <NavRow
-                    icon={icons.addMember}
-                    title="Add Team Member"
-                    subtitle="Add new team member details"
-                    onPress={() => router.push('/team/add')}
-                  />
+                  {isSeniorAssociate ? (
+                    <NavRow
+                      icon={icons.addMember}
+                      title="Add Team Member"
+                      subtitle="Add new team member details"
+                      onPress={() => router.push('/team/add')}
+                    />
+                  ) : null}
                   <NavRow
                     icon={icons.myTeam}
                     title="My Team"

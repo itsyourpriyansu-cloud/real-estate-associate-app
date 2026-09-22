@@ -7,19 +7,19 @@ import { OTPField } from '@/components/forms/SpecialFields';
 import { AppText } from '@/components/primitives/AppText';
 import { PROTOTYPE_CREDENTIALS } from '@/constants/prototype';
 import { space } from '@/design-system';
+import type { AuthResult } from '@/services/auth';
 import { haptics } from '@/services/haptics';
-import { useAuthStore } from '@/store/authStore';
 
 const RESEND_SECONDS = 30;
 
 const mmss = (seconds: number) => `0:${String(seconds).padStart(2, '0')}`;
 
 /**
- * OTP step of the prototype login. Six cells, a haptic when the code is accepted, a text error when
- * it is not. The resend timer is visual only — no code is sent and the copy never says otherwise.
+ * OTP step of the prototype login, shared by Associate and Admin login. Six cells, a haptic when
+ * the code is accepted, a text error when it is not. The resend timer is visual only — no code is
+ * sent and the copy never says otherwise. `onVerify` is which login this step completes.
  */
-export function OtpForm() {
-  const verifyOtp = useAuthStore((state) => state.verifyOtp);
+export function OtpForm({ onVerify }: { onVerify: (code: string) => Promise<AuthResult> }) {
   const toast = useToast();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
@@ -35,7 +35,7 @@ export function OtpForm() {
   const submit = async (value: string) => {
     setVerifying(true);
     setError(undefined);
-    const result = await verifyOtp(value);
+    const result = await onVerify(value);
     setVerifying(false);
     if (result.ok) {
       haptics.success();

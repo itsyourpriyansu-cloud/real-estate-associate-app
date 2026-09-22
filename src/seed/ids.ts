@@ -3,6 +3,7 @@
 export const ASSOCIATE_ID = 'usr_raghunath';
 export const TEAM_LEAD_ID = 'usr_meenakshi';
 export const ASSOCIATE_NAME = 'K. V. Raghunath Reddy';
+export const ADMIN_ID = 'usr_admin_priya';
 
 export type ProjectKey = 'rr' | 'ag' | 'nc' | 'ce';
 
@@ -19,6 +20,7 @@ export const leadId = (n: number) => `lead_${pad(n)}`;
 export const memberId = (n: number) => `usr_member_${pad(n)}`;
 export const saleId = (n: number) => `sale_${pad(n)}`;
 export const salesTargetId = (n: number) => `target_${pad(n)}`;
+export const incentiveId = (n: number) => `incentive_${pad(n)}`;
 export const plotId = (key: ProjectKey, n: number) => `plot_${key}_${pad(n)}`;
 export const taskId = (n: number) => `task_${pad(n)}`;
 export const visitId = (n: number) => `visit_${pad(n)}`;

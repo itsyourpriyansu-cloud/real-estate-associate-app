@@ -5,6 +5,8 @@ import {
   type User,
 } from '@/domain';
 
+import { SENIOR_ASSOCIATE_DESIGNATION } from '@/constants/prototype';
+
 import type { TeamRepository } from '../contracts';
 import { fail, type MockContext } from './MockContext';
 import { currentAssociate, downlineOf } from './effects';
@@ -50,6 +52,8 @@ export class MockTeamRepository implements TeamRepository {
 
     return this.ctx.write((data, now) => {
       const me = currentAssociate(data);
+      if (me.designation !== SENIOR_ASSOCIATE_DESIGNATION)
+        fail('INVALID_INPUT', 'Only a Senior Associate can add a team member');
       const downline = downlineOf(data, me.id);
 
       if (data.users.some((u) => u.phone === phone))

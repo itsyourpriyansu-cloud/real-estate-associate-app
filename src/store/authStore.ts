@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { DEFAULT_COUNTRY_CODE, PROTOTYPE_ADMIN_PHONE, STORAGE_KEYS } from '@/constants/prototype';
+import { setCurrentSessionPhone } from '@/repositories';
 import { prototypeAuth, type AuthResult } from '@/services/auth';
 import { storage } from '@/services/storage';
 
@@ -73,6 +74,7 @@ export const useAuthStore = create<AuthState>()(
         if (!pendingPhone) return { ok: false, error: 'NO_PENDING_PHONE' };
         const result = await prototypeAuth.verifyOtp(code);
         if (result.ok) {
+          setCurrentSessionPhone(pendingPhone);
           set({ session: { kind: 'associate', phone: pendingPhone }, pendingPhone: null });
         }
         return result;
@@ -93,14 +95,23 @@ export const useAuthStore = create<AuthState>()(
         if (!pendingAdminPhone) return { ok: false, error: 'NO_PENDING_PHONE' };
         const result = await prototypeAuth.verifyOtp(code);
         if (result.ok) {
+          // The admin session carries no phone (see `Session`'s doc comment), but the CEO's seeded
+          // `User` shares this number, so the mock can still resolve "who is signed in" for it.
+          setCurrentSessionPhone(pendingAdminPhone);
           set({ session: { kind: 'admin' }, pendingAdminPhone: null });
         }
         return result;
       },
 
-      continueAsGuest: () => set({ session: { kind: 'guest' }, pendingPhone: null }),
+      continueAsGuest: () => {
+        setCurrentSessionPhone(null);
+        set({ session: { kind: 'guest' }, pendingPhone: null });
+      },
 
-      signOut: () => set({ session: SIGNED_OUT, pendingPhone: null, pendingAdminPhone: null }),
+      signOut: () => {
+        setCurrentSessionPhone(null);
+        set({ session: SIGNED_OUT, pendingPhone: null, pendingAdminPhone: null });
+      },
     }),
     {
       name: STORAGE_KEYS.auth,
@@ -109,6 +120,11 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({ session: state.session }),
       migrate: (persisted, version) =>
         version < PERSIST_VERSION ? migrateSession(persisted) : (persisted as AuthState),
+      // The mock's "current phone" is in-memory only, so a session restored from storage on app
+      // start must re-sync it — otherwise `getCurrent()` would not resolve after a restart.
+      onRehydrateStorage: () => (state) => {
+        if (state?.session.kind === 'associate') setCurrentSessionPhone(state.session.phone);
+      },
     },
   ),
 );

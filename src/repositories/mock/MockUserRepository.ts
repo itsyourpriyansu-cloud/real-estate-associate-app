@@ -2,14 +2,15 @@ import type { User } from '@/domain';
 
 import type { UserRepository } from '../contracts';
 import type { MockContext } from './MockContext';
-import { currentAssociate } from './effects';
+import { currentUserOrNull } from './effects';
 
 export class MockUserRepository implements UserRepository {
   constructor(private readonly ctx: MockContext) {}
 
-  /** The mock dataset has a single associate; an API implementation resolves this from the auth token. */
+  /** Resolved by the session's phone; an API implementation resolves this from the auth token. */
   getCurrent(): Promise<User | null> {
-    return this.ctx.read((data) => currentAssociate(data));
+    const phone = this.ctx.currentPhone();
+    return this.ctx.read((data) => currentUserOrNull(data, phone));
   }
 
   getById(id: string): Promise<User | null> {

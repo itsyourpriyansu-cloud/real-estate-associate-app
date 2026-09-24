@@ -28,6 +28,8 @@ export interface MockRepositories {
   repositories: Repositories;
   /** Discards all local mutations and re-seeds for the current scenario and clock. */
   resetPrototypeData(): Promise<void>;
+  /** Prototype-only: tells the mock which phone is signed in, so `getCurrent()` resolves per-session. */
+  setCurrentPhone(phone: string | null): void;
 }
 
 /** Wires the twelve mock repositories to one shared in-memory/persisted database. */
@@ -55,5 +57,6 @@ export function createMockRepositories({
       sales: new MockSalesRepository(ctx),
     },
     resetPrototypeData: () => db.reset(),
+    setCurrentPhone: (phone) => ctx.setCurrentPhone(phone),
   };
 }

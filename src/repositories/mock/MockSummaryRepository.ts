@@ -22,17 +22,19 @@ export class MockSummaryRepository implements SummaryRepository {
   }
 
   getAssociateSummary(): Promise<AssociateSummary> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.read((data) => {
-      const me = currentAssociate(data);
-      const team = teamUsers(data, me.teamName);
+      const me = currentAssociate(data, phone);
+      const team = teamUsers(data, me.teamId);
       const teamIds = new Set(team.map((u) => u.id));
+      const teamName = data.teams.find((t) => t.id === me.teamId)?.name ?? '';
 
       const mySales = data.sales.filter((s) => s.associateId === me.id);
       const teamSales = data.sales.filter((s) => teamIds.has(s.associateId));
       const teamVisits = data.visits.filter((v) => teamIds.has(v.associateId));
 
       return {
-        teamName: me.teamName ?? '',
+        teamName,
         totalRegisteredSqYd: registeredSqYd(data.plots),
         teamTotalSales: sumSales(teamSales),
         teamMembers: team.length,

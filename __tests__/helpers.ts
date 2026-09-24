@@ -1,5 +1,6 @@
-import type { PrototypeDataset } from '@/seed';
+import type { User } from '@/domain';
 import { createMockRepositories } from '@/repositories/mock';
+import type { PrototypeDataset } from '@/seed';
 import { buildSeedDataset, datasetFingerprint } from '@/seed';
 import { AppClock, type ClockMode } from '@/services/clock';
 import { SimulationController, type PrototypeScenario } from '@/services/simulation';
@@ -45,12 +46,12 @@ export async function createTestRepositoriesWithSeed(mutate: (dataset: Prototype
   return createTestRepositories({ storage, clockMode: 'DEMO' });
 }
 
-/** The current associate's `designation` patched to `designation` before it is first read. */
-export function createTestRepositoriesWithDesignation(userId: string, designation: string) {
+/** One seeded user patched with `patch` before it is first read. */
+export function createTestRepositoriesWithUser(userId: string, patch: Partial<User>) {
   return createTestRepositoriesWithSeed((dataset) => {
     const user = dataset.users.find((u) => u.id === userId);
     if (!user) throw new Error(`seed user ${userId} missing`);
-    user.designation = designation;
+    Object.assign(user, patch);
   });
 }
 

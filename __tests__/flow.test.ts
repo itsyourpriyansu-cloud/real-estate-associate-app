@@ -10,14 +10,15 @@ import {
 import { RepositoryError } from '@/repositories';
 import { ASSOCIATE_ID } from '@/seed/ids';
 import { buildSeedDataset, type PrototypeDataset } from '@/seed';
+import { TEAM_ID } from '@/seed/teams';
 import { demoDayStart } from '@/services/clock';
 import type { DatasetScenario } from '@/services/simulation';
 import { MemoryStorage } from '@/services/storage';
 
 import {
   createTestRepositories,
-  createTestRepositoriesWithDesignation,
   createTestRepositoriesWithSeed,
+  createTestRepositoriesWithUser,
 } from './helpers';
 
 const build = (scenario: DatasetScenario = 'NORMAL'): PrototypeDataset =>
@@ -39,23 +40,42 @@ describe('flow seed: team, sales, targets, project status', () => {
   const data = build('NORMAL');
   const users = new Map(data.users.map((u) => [u.id, u]));
 
-  it('gives every sponsor an existing user on the same team, with no cycles', () => {
+  it('gives every reporting manager an existing user, same team where both have one, with no cycles', () => {
     for (const user of data.users) {
-      if (!user.sponsorId) continue;
-      const sponsor = users.get(user.sponsorId);
-      expect({ id: user.id, sponsorExists: sponsor !== undefined }).toEqual({
+      if (!user.reportingManagerId) continue;
+      const manager = users.get(user.reportingManagerId);
+      expect({ id: user.id, managerExists: manager !== undefined }).toEqual({
         id: user.id,
-        sponsorExists: true,
+        managerExists: true,
       });
-      expect(sponsor?.teamName).toBe(user.teamName);
+      // CEO/Management belong to no team, so a Marketing Head's manager has no teamId to compare.
+      if (user.teamId && manager?.teamId) expect(manager.teamId).toBe(user.teamId);
 
       const seen = new Set([user.id]);
-      let cursor = sponsor;
+      let cursor = manager;
       while (cursor) {
         expect(seen.has(cursor.id)).toBe(false);
         seen.add(cursor.id);
-        cursor = cursor.sponsorId ? users.get(cursor.sponsorId) : undefined;
+        cursor = cursor.reportingManagerId ? users.get(cursor.reportingManagerId) : undefined;
       }
+    }
+  });
+
+  it('gives every user a manager at an allowed level of the CEO → … → Junior Associate chain', () => {
+    const ALLOWED: Record<string, string[]> = {
+      CEO: [],
+      MANAGEMENT: ['CEO', 'MANAGEMENT'],
+      MARKETING_HEAD: ['MANAGEMENT'],
+      SENIOR_ASSOCIATE: ['MARKETING_HEAD'],
+      JUNIOR_ASSOCIATE: ['MARKETING_HEAD', 'SENIOR_ASSOCIATE'],
+    };
+    for (const user of data.users) {
+      if (!user.reportingManagerId) {
+        expect(ALLOWED[user.orgLevel]).toEqual([]);
+        continue;
+      }
+      const manager = users.get(user.reportingManagerId);
+      expect(manager && ALLOWED[user.orgLevel]?.includes(manager.orgLevel)).toBe(true);
     }
   });
 
@@ -88,7 +108,7 @@ describe('flow seed: team, sales, targets, project status', () => {
   });
 
   it('gives the demo associate, the team and other teams sales to total', () => {
-    const team = new Set(data.users.filter((u) => u.teamName === 'YHIPL2').map((u) => u.id));
+    const team = new Set(data.users.filter((u) => u.teamId === TEAM_ID.yhipl2).map((u) => u.id));
     const mine = data.sales.filter((s) => s.associateId === ME);
     const teamSales = data.sales.filter((s) => team.has(s.associateId));
     expect(mine.length).toBeGreaterThan(0);
@@ -99,7 +119,7 @@ describe('flow seed: team, sales, targets, project status', () => {
 
   it('has YHIPL2 targets for three consecutive months', () => {
     expect(data.salesTargets.map((t) => t.period)).toEqual(['2026-09', '2026-08', '2026-07']);
-    expect(data.salesTargets.every((t) => t.teamName === 'YHIPL2')).toBe(true);
+    expect(data.salesTargets.every((t) => t.teamId === TEAM_ID.yhipl2)).toBe(true);
   });
 
   it('marks two projects completed and two ongoing', () => {
@@ -129,11 +149,11 @@ describe('SummaryRepository', () => {
     });
   });
 
-  it('builds the dashboard containers: team 16, my team 9, sales and visits ready', async () => {
+  it('builds the dashboard containers: team 16, my team 4, sales and visits ready', async () => {
     const { repositories: r } = createTestRepositories();
     const summary = await r.summary.getAssociateSummary();
     expect(() => associateSummarySchema.parse(summary)).not.toThrow();
-    expect(summary).toMatchObject({ teamName: 'YHIPL2', teamMembers: 16, myTeam: 9 });
+    expect(summary).toMatchObject({ teamName: 'YHIPL2', teamMembers: 16, myTeam: 4 });
     expect(summary.mySales.state).toBe('READY');
     expect(summary.teamSiteVisits).toEqual({ state: 'READY', value: 7 });
     expect(summary.teamTotalSales.count).toBeGreaterThan(0);
@@ -144,7 +164,7 @@ describe('SummaryRepository', () => {
     const summary = await r.summary.getAssociateSummary();
     expect(summary.mySales).toEqual({ state: 'PENDING' });
     expect(summary.teamSiteVisits).toEqual({ state: 'PENDING' });
-    expect(summary.myTeam).toBe(9);
+    expect(summary.myTeam).toBe(4);
   });
 
   it('fails like every other repository when offline', async () => {
@@ -155,20 +175,23 @@ describe('SummaryRepository', () => {
 });
 
 describe('TeamRepository', () => {
-  it('lists the downline by level: 4 direct, 4 at level 2, 1 at level 3', async () => {
+  it('lists the downline: 4 direct Junior Associates, all reporting straight to the caller', async () => {
     const { repositories: r } = createTestRepositories();
     const team = await r.team.listMyTeam();
-    expect(team).toHaveLength(9);
-    expect(team.map((m) => m.level)).toEqual([1, 1, 1, 1, 2, 2, 2, 2, 3]);
-    expect(team.every((m) => m.teamName === 'YHIPL2' && m.id !== ME && m.id !== LEAD)).toBe(true);
-    expect(team.filter((m) => m.level === 1).every((m) => m.sponsorId === ME)).toBe(true);
+    expect(team).toHaveLength(4);
+    expect(team.map((m) => m.level)).toEqual([1, 1, 1, 1]);
+    expect(
+      team.every((m) => m.teamId === TEAM_ID.yhipl2 && m.id !== ME && m.id !== LEAD),
+    ).toBe(true);
+    expect(team.every((m) => m.reportingManagerId === ME)).toBe(true);
   });
 
   it('returns a member of the downline, and null for anyone outside it', async () => {
     const { repositories: r } = createTestRepositories();
-    expect(await r.team.getMember('usr_member_008')).toMatchObject({ level: 3 });
+    expect(await r.team.getMember('usr_member_002')).toMatchObject({ level: 1 });
     expect(await r.team.getMember(LEAD)).toBeNull(); // upline
-    expect(await r.team.getMember('usr_member_010')).toBeNull(); // same team, other branch
+    // A Senior Associate's own downline (member 1's) is outside the caller's downline.
+    expect(await r.team.getMember('usr_member_005')).toBeNull();
     expect(await r.team.getMember('usr_member_015')).toBeNull(); // other team
     expect(await r.team.getMember('nope')).toBeNull();
   });
@@ -177,48 +200,50 @@ describe('TeamRepository', () => {
     const { repositories: r } = createTestRepositories();
     const member = await r.team.addMember({ fullName: 'Asha Menon', phone: '+919811100001' });
     expect(member).toMatchObject({
-      role: 'ASSOCIATE',
+      orgLevel: 'JUNIOR_ASSOCIATE',
       status: 'ACTIVE',
-      sponsorId: ME,
+      reportingManagerId: ME,
       level: 1,
-      teamName: 'YHIPL2',
+      teamId: TEAM_ID.yhipl2,
       associateCode: 'YH-APL2-1065',
     });
 
-    expect(await r.team.listMyTeam()).toHaveLength(10);
-    expect(await r.summary.getAssociateSummary()).toMatchObject({ teamMembers: 17, myTeam: 10 });
+    expect(await r.team.listMyTeam()).toHaveLength(5);
+    expect(await r.summary.getAssociateSummary()).toMatchObject({ teamMembers: 17, myTeam: 5 });
   });
 
-  it('adds a member under someone in the downline, one level deeper', async () => {
+  it('rejects a new hire whose manager would be a Junior Associate (hierarchy violation)', async () => {
     const { repositories: r } = createTestRepositories();
-    const member = await r.team.addMember({
-      fullName: 'Ravi Teja',
-      phone: '+919811100002',
-      email: 'ravi.teja@example.com',
-      sponsorId: 'usr_member_008',
-    });
-    expect(member).toMatchObject({ sponsorId: 'usr_member_008', level: 4 });
+    // usr_member_002 is one of the caller's own Junior Associate reports — not a valid manager.
+    await rejectsWith(
+      r.team.addMember({
+        fullName: 'Ravi Teja',
+        phone: '+919811100002',
+        email: 'ravi.teja@example.com',
+        reportingManagerId: 'usr_member_002',
+      }),
+      'INVALID_INPUT',
+    );
   });
 
-  it('rejects a duplicate number, a sponsor outside the downline, and a bad name', async () => {
+  it('rejects a duplicate number, a manager outside the downline, and a bad name', async () => {
     const { repositories: r } = createTestRepositories();
     await rejectsWith(
       r.team.addMember({ fullName: 'Copy Cat', phone: '+919876500017' }),
       'INVALID_INPUT',
     );
     await rejectsWith(
-      r.team.addMember({ fullName: 'Out Sider', phone: '+919811100003', sponsorId: LEAD }),
+      r.team.addMember({ fullName: 'Out Sider', phone: '+919811100003', reportingManagerId: LEAD }),
       'INVALID_INPUT',
     );
     await rejectsWith(r.team.addMember({ fullName: 'A', phone: '+919811100004' }), 'INVALID_INPUT');
-    expect(await r.team.listMyTeam()).toHaveLength(9);
+    expect(await r.team.listMyTeam()).toHaveLength(4);
   });
 
   it('rejects adding a member when the caller is not a Senior Associate', async () => {
-    const { repositories: r } = await createTestRepositoriesWithDesignation(
-      ASSOCIATE_ID,
-      'Associate',
-    );
+    const { repositories: r } = await createTestRepositoriesWithUser(ASSOCIATE_ID, {
+      orgLevel: 'JUNIOR_ASSOCIATE',
+    });
     await rejectsWith(
       r.team.addMember({ fullName: 'Blocked Buyer', phone: '+919811100005' }),
       'INVALID_INPUT',
@@ -232,7 +257,7 @@ describe('TeamRepository', () => {
       phone: '+919811100001',
     });
     const restarted = createTestRepositories({ storage }).repositories;
-    expect(await restarted.team.listMyTeam()).toHaveLength(10);
+    expect(await restarted.team.listMyTeam()).toHaveLength(5);
   });
 });
 
@@ -343,12 +368,16 @@ describe('SalesRepository', () => {
 });
 
 describe('AdminRepository', () => {
-  it('lists only ASSOCIATE-role users', async () => {
+  it('lists only associate-level (Senior/Junior) users', async () => {
     const { repositories: r } = createTestRepositories();
     const associates = await r.admin.listAssociates();
     expect(associates.length).toBeGreaterThan(0);
-    expect(associates.every((a) => a.role === 'ASSOCIATE')).toBe(true);
-    expect(associates.some((a) => a.id === LEAD)).toBe(false); // TEAM_LEAD excluded
+    expect(
+      associates.every(
+        (a) => a.orgLevel === 'SENIOR_ASSOCIATE' || a.orgLevel === 'JUNIOR_ASSOCIATE',
+      ),
+    ).toBe(true);
+    expect(associates.some((a) => a.id === LEAD)).toBe(false); // Marketing Head excluded
   });
 
   it('promotes an associate to Senior Associate, and is idempotent', async () => {

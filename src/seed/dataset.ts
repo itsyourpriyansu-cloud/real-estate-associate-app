@@ -8,10 +8,12 @@ import {
   leadSchema,
   plotSchema,
   projectSchema,
+  roleSchema,
   saleSchema,
   salesTargetSchema,
   siteVisitSchema,
   taskSchema,
+  teamSchema,
   timelineEventSchema,
   userSchema,
 } from '@/domain';
@@ -23,6 +25,8 @@ import {
  */
 export const prototypeDatasetSchema = z.object({
   users: z.array(userSchema),
+  roles: z.array(roleSchema),
+  teams: z.array(teamSchema),
   admins: z.array(adminSchema),
   leads: z.array(leadSchema),
   timeline: z.array(timelineEventSchema),

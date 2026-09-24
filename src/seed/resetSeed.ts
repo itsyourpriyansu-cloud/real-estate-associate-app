@@ -12,9 +12,11 @@ import { buildNotifications } from './notifications';
 import { buildPlots } from './plots';
 import { pickSeedPlots } from './picks';
 import { buildProjects } from './projects';
+import { buildRoles } from './roles';
 import { buildSales, buildSalesTargets } from './sales';
 import { applyBusyDay } from './scenarios';
 import { buildTasks } from './tasks';
+import { buildTeams } from './teams';
 import { createSeedTime } from './time';
 import { buildTimeline } from './timeline';
 import { buildUsers } from './users';
@@ -33,6 +35,8 @@ export interface SeedOptions {
 export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDataset {
   const t = createSeedTime(anchor);
   const users = buildUsers(t);
+  const roles = buildRoles();
+  const teams = buildTeams(t);
   const admins = [buildAdmin()];
   const associateIncentives = buildAssociateIncentives(t, users);
   const plots = buildPlots(t);
@@ -43,6 +47,8 @@ export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDa
   if (scenario === 'EMPTY_CRM') {
     return {
       users,
+      roles,
+      teams,
       admins,
       projects,
       plots,
@@ -80,6 +86,8 @@ export function buildSeedDataset({ anchor, scenario }: SeedOptions): PrototypeDa
 
   return {
     users,
+    roles,
+    teams,
     admins,
     leads,
     projects,

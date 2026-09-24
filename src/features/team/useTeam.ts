@@ -9,11 +9,13 @@ export function useTeam() {
   return useAsyncResource(loader);
 }
 
-/** One member of the downline, and who added them. `member` is null outside the downline. */
+/** One member of the downline, and who they report to. `member` is null outside the downline. */
 export function useMember(memberId: string) {
   const loader = useCallback(async () => {
     const member = await teamRepository.getMember(memberId);
-    const sponsor = member?.sponsorId ? await userRepository.getById(member.sponsorId) : null;
+    const sponsor = member?.reportingManagerId
+      ? await userRepository.getById(member.reportingManagerId)
+      : null;
     return { member, sponsor };
   }, [memberId]);
   return useAsyncResource(loader);

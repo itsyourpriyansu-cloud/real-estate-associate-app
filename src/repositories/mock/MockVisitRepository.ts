@@ -41,6 +41,7 @@ export class MockVisitRepository implements VisitRepository {
   }
 
   schedule(input: ScheduleVisitInput): Promise<SiteVisit> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       const lead = requireLead(data, input.leadId);
       const project = data.projects.find((p) => p.id === input.projectId);
@@ -55,7 +56,7 @@ export class MockVisitRepository implements VisitRepository {
         ),
         leadId: lead.id,
         projectId: project.id,
-        associateId: currentAssociate(data).id,
+        associateId: currentAssociate(data, phone).id,
         scheduledAt: input.scheduledAt,
         status: 'SCHEDULED',
         shortlistedPlotIds: [],
@@ -88,12 +89,14 @@ export class MockVisitRepository implements VisitRepository {
           metadata: { visitId: visit.id, projectId: project.id },
         },
         now,
+        phone,
       );
       return visit;
     });
   }
 
   updateStatus(visitId: string, status: VisitStatus): Promise<SiteVisit> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       const visit = data.visits.find((v) => v.id === visitId);
       if (!visit) fail('NOT_FOUND', `Visit ${visitId} not found`);
@@ -112,6 +115,7 @@ export class MockVisitRepository implements VisitRepository {
             metadata: { visitId: visit.id, projectId: visit.projectId },
           },
           now,
+          phone,
         );
       }
       if (FINAL_STATUSES.includes(status)) closeVisitTask(data, visit);

@@ -120,7 +120,7 @@ describe('Dashboard', () => {
     await show(<DashboardScreen />);
     expect(await screen.findByText('Total registered sq. yards')).toBeTruthy();
     expect(await screen.findByLabelText('Team members, 16')).toBeTruthy();
-    expect(screen.getByLabelText('My team, 9')).toBeTruthy();
+    expect(screen.getByLabelText('My team, 4')).toBeTruthy();
     expect(screen.getByText('My performance')).toBeTruthy();
     for (const title of [
       'Our Projects',
@@ -197,13 +197,14 @@ describe('Project Gallery', () => {
 });
 
 describe('My Team and Add Member', () => {
-  it('lists the downline with levels and filters by level', async () => {
+  it('lists the downline (a flat team of direct reports) and filters by level', async () => {
     await show(<MyTeamScreen />);
-    expect(await screen.findByText('Vikram Naidu')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Level 3, 1' })).toBeTruthy();
-    await fireEvent.press(screen.getByRole('button', { name: 'Level 3, 1' }));
-    expect(screen.getByText('Harsha Vardhan')).toBeTruthy();
-    expect(screen.queryByText('Vikram Naidu')).toBeNull();
+    expect(await screen.findByText('Deepa Krishnan')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'All, 4' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Level 1, 4' })).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Level 1, 4' }));
+    expect(screen.getByText('Deepa Krishnan')).toBeTruthy();
+    expect(screen.getByText('Pallavi Joshi')).toBeTruthy();
   });
 
   it('validates the form with messages under the fields, and does not add anyone', async () => {

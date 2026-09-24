@@ -21,12 +21,12 @@ import {
 import { space } from '@/design-system';
 import { useAuthStore } from '@/store/authStore';
 
-import { useCurrentUser } from './useCurrentUser';
+import { useCurrentUserWithTeam } from './useCurrentUser';
 
 /** Profile: who is signed in, their team and codes, and the way out. */
 export function ProfileScreen() {
   const router = useRouter();
-  const user = useCurrentUser();
+  const user = useCurrentUserWithTeam();
   const signOut = useAuthStore((state) => state.signOut);
 
   return (
@@ -40,7 +40,7 @@ export function ProfileScreen() {
         subject="your profile"
         loading={<LoadingState variant="cards" count={1} />}
       >
-        {(me) =>
+        {({ user: me, teamName }) =>
           me ? (
             <>
               <Reveal index={0}>
@@ -73,7 +73,7 @@ export function ProfileScreen() {
                         <Divider />
                       </>
                     ) : null}
-                    <ListRow title="Team" subtitle={me.teamName ?? '–'} />
+                    <ListRow title="Team" subtitle={teamName ?? '–'} />
                     <Divider />
                     <ListRow
                       title="Joined"

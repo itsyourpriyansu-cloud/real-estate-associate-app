@@ -58,6 +58,7 @@ export class MockLeadRepository implements LeadRepository {
   }
 
   updateStage(leadId: string, stage: Lead['stage']): Promise<Lead> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       const lead = requireLead(data, leadId);
       if (lead.stage !== stage) {
@@ -72,6 +73,7 @@ export class MockLeadRepository implements LeadRepository {
             metadata: { fromStage: from, toStage: stage },
           },
           now,
+          phone,
         );
       }
       return lead;
@@ -79,14 +81,16 @@ export class MockLeadRepository implements LeadRepository {
   }
 
   addTimelineEvent(leadId: string, input: AddTimelineEventInput): Promise<TimelineEvent> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       requireLead(data, leadId);
       if (!input.title.trim()) fail('INVALID_INPUT', 'Timeline event needs a title');
-      return appendTimelineEvent(data, { leadId, ...input }, now);
+      return appendTimelineEvent(data, { leadId, ...input }, now, phone);
     });
   }
 
   shortlistPlot(leadId: string, plotId: string): Promise<Lead> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       const lead = requireLead(data, leadId);
       const plot = data.plots.find((p) => p.id === plotId);
@@ -102,6 +106,7 @@ export class MockLeadRepository implements LeadRepository {
             metadata: { plotId, projectId: plot.projectId },
           },
           now,
+          phone,
         );
       }
       return lead;

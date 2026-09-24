@@ -30,4 +30,7 @@ export const salesRepository = repositories.sales;
 /** Prototype-only: drop local mutations and re-seed. Not part of any repository contract. */
 export const resetPrototypeData = mock.resetPrototypeData;
 
+/** Prototype-only: tells the mock which phone is signed in. Called by `authStore`. */
+export const setCurrentSessionPhone = mock.setCurrentPhone;
+
 export * from './contracts';

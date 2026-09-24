@@ -41,7 +41,7 @@ describe('basic list / get operations', () => {
     expect(await r.conversations.list()).toHaveLength(8);
     expect(await r.notifications.list()).toHaveLength(14);
     expect((await r.users.getCurrent())?.associateCode).toBe('YH-APL2-1048');
-    expect((await r.users.getByPhone('+919876543210'))?.role).toBe('ASSOCIATE');
+    expect((await r.users.getByPhone('+919876543210'))?.orgLevel).toBe('SENIOR_ASSOCIATE');
     expect(await r.users.getByPhone('+910000000000')).toBeNull();
     expect((await r.tasks.getById('task_001'))?.title).toContain('Real Rise');
     expect((await r.visits.getById('visit_001'))?.leadId).toBe('lead_001');

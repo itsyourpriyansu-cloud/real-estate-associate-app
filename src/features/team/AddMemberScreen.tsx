@@ -64,11 +64,15 @@ export function AddMemberScreen() {
   const sponsorOptions = useMemo<SelectOption<string>[]>(
     () => [
       { value: ME, label: 'Directly under me' },
-      ...(team.data ?? []).map((m) => ({
-        value: m.id,
-        label: m.fullName,
-        description: `Level ${m.level} · ${m.associateCode}`,
-      })),
+      // A new member always joins as a Junior Associate, who may only report to a Senior
+      // Associate or Marketing Head — a Junior downline member is not a valid choice.
+      ...(team.data ?? [])
+        .filter((m) => m.orgLevel === 'SENIOR_ASSOCIATE' || m.orgLevel === 'MARKETING_HEAD')
+        .map((m) => ({
+          value: m.id,
+          label: m.fullName,
+          description: `Level ${m.level} · ${m.associateCode}`,
+        })),
     ],
     [team.data],
   );
@@ -80,7 +84,7 @@ export function AddMemberScreen() {
         fullName: values.fullName,
         phone: `${DEFAULT_COUNTRY_CODE}${values.phone}`,
         ...(values.email ? { email: values.email } : null),
-        ...(values.sponsor !== ME ? { sponsorId: values.sponsor } : null),
+        ...(values.sponsor !== ME ? { reportingManagerId: values.sponsor } : null),
       });
       haptics.success();
       toast.show({ tone: 'success', message: `${member.fullName} joined your team.` });
@@ -90,7 +94,7 @@ export function AddMemberScreen() {
       const detail = isRepositoryError(error) ? error.message.toLowerCase() : '';
       if (detail.includes('phone')) {
         setError('phone', { message: 'A member with this mobile number already exists.' });
-      } else if (detail.includes('sponsor')) {
+      } else if (detail.includes('manager')) {
         setError('sponsor', { message: 'Choose yourself or someone in your team.' });
       } else {
         setFormError('Couldn’t add this member. Check the details and try again.');

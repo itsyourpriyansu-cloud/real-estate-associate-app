@@ -1,5 +1,6 @@
 import { plotSchema, type PlotStatus } from '@/domain';
 import { buildSeedDataset, prototypeDatasetSchema, type PrototypeDataset } from '@/seed';
+import { TEAM_ID } from '@/seed/teams';
 import { AppClock, demoDayStart } from '@/services/clock';
 import type { DatasetScenario } from '@/services/simulation';
 
@@ -115,11 +116,15 @@ describe.each<DatasetScenario>(['NORMAL', 'BUSY_DAY', 'EMPTY_CRM'])(
 describe('seed volume and content (Normal)', () => {
   const data = build('NORMAL');
 
+  const isAssociateLevel = (u: PrototypeDataset['users'][number]) =>
+    u.orgLevel === 'SENIOR_ASSOCIATE' || u.orgLevel === 'JUNIOR_ASSOCIATE';
+
   it('meets the minimum volumes from the spec', () => {
-    expect(data.users.find((u) => u.role === 'ASSOCIATE')?.id).toBe('usr_raghunath');
+    expect(data.users.find(isAssociateLevel)?.id).toBe('usr_raghunath');
+    // Every associate-level user reports to someone — no orphans under the strict hierarchy.
     expect(
-      data.users.filter((u) => u.sponsorId === undefined && u.role === 'ASSOCIATE'),
-    ).toHaveLength(1); // the other team's root
+      data.users.filter((u) => u.reportingManagerId === undefined && isAssociateLevel(u)),
+    ).toHaveLength(0);
     expect(data.leads).toHaveLength(18);
     expect(data.projects).toHaveLength(4);
     expect(data.plots).toHaveLength(120);
@@ -131,12 +136,12 @@ describe('seed volume and content (Normal)', () => {
   });
 
   it('seeds the suggested associate exactly', () => {
-    const associate = data.users.find((u) => u.role === 'ASSOCIATE');
+    const associate = data.users.find(isAssociateLevel);
     expect(associate).toMatchObject({
       fullName: 'K. V. Raghunath Reddy',
       designation: 'Senior Associate',
       associateCode: 'YH-APL2-1048',
-      teamName: 'YHIPL2',
+      teamId: TEAM_ID.yhipl2,
       phone: '+919876543210',
     });
   });

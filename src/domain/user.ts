@@ -1,32 +1,45 @@
 import { z } from 'zod';
 
 import { idSchema, isoDateTimeSchema, phoneSchema } from './common';
+import { organizationLevelSchema } from './role';
 
-/** `ASSOCIATE` and `TEAM_LEAD` are the sales roles; both sign in through Associate Login. */
-export const userRoleSchema = z.enum(['ASSOCIATE', 'TEAM_LEAD']);
-export type UserRole = z.infer<typeof userRoleSchema>;
-
-export const userStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);
+export const userStatusSchema = z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']);
 export type UserStatus = z.infer<typeof userStatusSchema>;
+
+/** One entry in a user's append-only status history. No hard deletes — see AGENTS.md rule 3/spec. */
+export const userStatusChangeSchema = z.object({
+  status: userStatusSchema,
+  changedAt: isoDateTimeSchema,
+  changedByUserId: idSchema,
+  reason: z.string().min(1).optional(),
+});
+export type UserStatusChange = z.infer<typeof userStatusChangeSchema>;
 
 export const userSchema = z.object({
   id: idSchema,
-  role: userRoleSchema,
   fullName: z.string().min(1),
   phone: phoneSchema,
   email: z.email().optional(),
   avatarUrl: z.string().min(1).optional(),
   associateCode: z.string().min(1),
-  designation: z.string().min(1),
-  /** The team label shared by everyone in one organisation, e.g. "YHIPL2". */
-  teamName: z.string().min(1).optional(),
+  /** FK → Role. Carries the permission set. */
+  roleId: idSchema,
+  /** Denormalised from `role.orgLevel`; kept in sync by `EmployeeRepository`, never edited directly. */
+  orgLevel: organizationLevelSchema,
+  /** Free-text *display* label only ("Zonal Head") — never permission-bearing. */
+  designation: z.string().min(1).optional(),
+  /** FK → Team. Optional: CEO/Management may belong to no team. */
+  teamId: idSchema.optional(),
   /**
-   * The direct upline: the user who added this person. The chain of `sponsorId`s is the "My Team"
-   * tree, so a team member is a User — there is no parallel team-member entity.
+   * The formal org-chart parent (was `sponsorId`). Walking this chain is both "my team" (a
+   * downline) and the hierarchy CEO → Management → Marketing Head → Senior Associate → Junior
+   * Associate — see `ALLOWED_MANAGER_LEVELS` in `repositories/mock/effects.ts`.
    */
-  sponsorId: idSchema.optional(),
+  reportingManagerId: idSchema.optional(),
   joinedAt: isoDateTimeSchema,
   status: userStatusSchema,
+  /** Append-only. The current `status` is always `statusHistory.at(-1)?.status`. */
+  statusHistory: z.array(userStatusChangeSchema),
   /** Demo-only registration label. Never a real RERA number. */
   reraRegistration: z.string().min(1).optional(),
 });

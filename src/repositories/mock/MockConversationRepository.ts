@@ -32,6 +32,7 @@ export class MockConversationRepository implements ConversationRepository {
   }
 
   sendMessage(conversationId: string, input: SendMessageInput): Promise<Message> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.write((data, now) => {
       const conversation = data.conversations.find((c) => c.id === conversationId);
       if (!conversation) fail('NOT_FOUND', `Conversation ${conversationId} not found`);
@@ -60,6 +61,7 @@ export class MockConversationRepository implements ConversationRepository {
           description: body.slice(0, 120),
         },
         now,
+        phone,
       );
       return message;
     });

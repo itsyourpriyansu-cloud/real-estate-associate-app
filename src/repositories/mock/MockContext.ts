@@ -26,11 +26,29 @@ export function fail(code: RepositoryErrorCode, message: string): never {
  * An API-backed repository replaces all of this with an HTTP client.
  */
 export class MockContext {
+  /**
+   * The phone number of the signed-in session, set by a bridge in the composition root
+   * (`repositories/index.ts`'s `setCurrentSessionPhone`, called from `authStore` on sign-in/out) so
+   * `effects.ts`'s `currentUserOrNull`/`currentAssociate` resolve "who is signed in" per-session
+   * instead of a fixed seed row. Instance state (not module-level) so each independent
+   * `MockContext` — e.g. one per test — has its own, never leaking across isolated repository sets.
+   */
+  private currentUserPhone: string | null = null;
+
   constructor(
     private readonly db: MockDatabase,
     private readonly clock: Clock,
     private readonly simulation: SimulationController,
   ) {}
+
+  setCurrentPhone(phone: string | null): void {
+    this.currentUserPhone = phone;
+  }
+
+  /** `null` means no session set this phone — repositories fall back to the seed's demo associate. */
+  currentPhone(): string | null {
+    return this.currentUserPhone;
+  }
 
   private async gate(): Promise<void> {
     const latency = this.simulation.nextLatencyMs();

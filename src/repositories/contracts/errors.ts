@@ -6,11 +6,17 @@
  *  SERVER_ERROR   5xx / unexpected failure    → "Couldn't load … Try again"
  *  NOT_FOUND      unknown id on a write       → navigate back / empty state
  *  INVALID_INPUT  rejected by validation      → inline form error
+ *  FORBIDDEN      caller lacks permission     → "not authorized" state, no retry
  *
  * `message` is for developers/logs only — UI copy is written per screen (spec §22). Raw messages
  * and stack traces are never shown to users.
  */
-export type RepositoryErrorCode = 'OFFLINE' | 'SERVER_ERROR' | 'NOT_FOUND' | 'INVALID_INPUT';
+export type RepositoryErrorCode =
+  | 'OFFLINE'
+  | 'SERVER_ERROR'
+  | 'NOT_FOUND'
+  | 'INVALID_INPUT'
+  | 'FORBIDDEN';
 
 export class RepositoryError extends Error {
   readonly code: RepositoryErrorCode;

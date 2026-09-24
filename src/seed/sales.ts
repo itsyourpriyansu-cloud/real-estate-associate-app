@@ -2,8 +2,9 @@ import type { Plot, Sale, SalesTarget } from '@/domain';
 
 import { PROJECT_ID, saleId, salesTargetId } from './ids';
 import type { SeedPicks } from './picks';
+import { TEAM_ID } from './teams';
 import type { SeedTime } from './time';
-import { SELLING_USER_IDS, TEAM_NAME } from './users';
+import { SELLING_USER_IDS } from './users';
 
 /** Synthetic customer names for sales that are not part of the CRM narrative. */
 const CUSTOMER_NAMES: readonly string[] = [
@@ -64,21 +65,21 @@ export function buildSalesTargets(t: SeedTime): SalesTarget[] {
   return [
     {
       id: salesTargetId(1),
-      teamName: TEAM_NAME,
+      teamId: TEAM_ID.yhipl2,
       period: t.monthKey(0),
       targetAreaSqYd: 2_000,
       targetAmount: 50_000_000,
     },
     {
       id: salesTargetId(2),
-      teamName: TEAM_NAME,
+      teamId: TEAM_ID.yhipl2,
       period: t.monthKey(-1),
       targetAreaSqYd: 1_800,
       targetAmount: 45_000_000,
     },
     {
       id: salesTargetId(3),
-      teamName: TEAM_NAME,
+      teamId: TEAM_ID.yhipl2,
       period: t.monthKey(-2),
       targetAreaSqYd: 1_800,
       targetAmount: 45_000_000,

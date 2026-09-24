@@ -386,7 +386,7 @@ describe('list rows', () => {
     expect(screen.getByText(member.fullName)).toBeTruthy();
     expect(screen.getByText('Level 1')).toBeTruthy();
     await fireEvent.press(
-      screen.getByRole('button', { name: /Vikram Naidu, Senior Associate, level 1/ }),
+      screen.getByRole('button', { name: /Deepa Krishnan, Junior Associate, level 1/ }),
     );
     expect(onPress).toHaveBeenCalledTimes(1);
 

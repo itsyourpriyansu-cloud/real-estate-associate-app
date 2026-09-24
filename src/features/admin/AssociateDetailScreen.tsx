@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import {
@@ -41,21 +41,18 @@ export function AssociateDetailScreen({ associateId }: { associateId: string }) 
   const router = useRouter();
   const toast = useToast();
   const resource = useAssociateDetail(associateId);
-  const [commissionPercent, setCommissionPercent] = useState('');
-  const [rewardTarget, setRewardTarget] = useState('');
-  const [filled, setFilled] = useState(false);
+  // `null` means "no edit yet" — the field shows the loaded incentive until the user types.
+  const [commissionEdit, setCommissionEdit] = useState<string | null>(null);
+  const [rewardEdit, setRewardEdit] = useState<string | null>(null);
   const [promoting, setPromoting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (!filled && resource.data) {
-      const { incentive } = resource.data;
-      setCommissionPercent(incentive ? String(incentive.commissionRate * 100) : '');
-      setRewardTarget(incentive ? String(incentive.rewardPlotTarget) : '');
-      setFilled(true);
-    }
-  }, [resource.data, filled]);
+  const loadedIncentive = resource.data?.incentive;
+  const commissionPercent =
+    commissionEdit ?? (loadedIncentive ? String(loadedIncentive.commissionRate * 100) : '');
+  const rewardTarget =
+    rewardEdit ?? (loadedIncentive ? String(loadedIncentive.rewardPlotTarget) : '');
 
   const promote = async () => {
     setPromoting(true);
@@ -153,7 +150,7 @@ export function AssociateDetailScreen({ associateId }: { associateId: string }) 
                       label="Commission rate"
                       placeholder="5"
                       value={commissionPercent}
-                      onChangeText={(text) => setCommissionPercent(numeric(text))}
+                      onChangeText={(text) => setCommissionEdit(numeric(text))}
                       keyboardType="decimal-pad"
                       right={<AppText tone="secondary">%</AppText>}
                     />
@@ -161,7 +158,7 @@ export function AssociateDetailScreen({ associateId }: { associateId: string }) 
                       label="Reward plot target"
                       placeholder="5"
                       value={rewardTarget}
-                      onChangeText={(text) => setRewardTarget(numeric(text))}
+                      onChangeText={(text) => setRewardEdit(numeric(text))}
                       keyboardType="number-pad"
                       right={<AppText tone="secondary">plots</AppText>}
                     />

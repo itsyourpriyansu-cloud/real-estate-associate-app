@@ -5,6 +5,12 @@ export const TEAM_LEAD_ID = 'usr_meenakshi';
 export const ASSOCIATE_NAME = 'K. V. Raghunath Reddy';
 export const ADMIN_ID = 'usr_admin_priya';
 
+/** Org hierarchy above the sales teams (CEO → Management → Marketing Head). */
+export const CEO_ID = 'usr_ceo_priya';
+export const MANAGEMENT_ID = 'usr_mgmt_arvind';
+export const MARKETING_HEAD_YHIPL1_ID = 'usr_mh_yhipl1';
+export const MARKETING_HEAD_YHIPL3_ID = 'usr_mh_yhipl3';
+
 export type ProjectKey = 'rr' | 'ag' | 'nc' | 'ce';
 
 export const PROJECT_ID: Record<ProjectKey, string> = {

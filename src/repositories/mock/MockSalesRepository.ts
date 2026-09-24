@@ -15,15 +15,17 @@ export class MockSalesRepository implements SalesRepository {
   constructor(private readonly ctx: MockContext) {}
 
   listMine(): Promise<Sale[]> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.read((data) => {
-      const me = currentAssociate(data);
+      const me = currentAssociate(data, phone);
       return data.sales.filter((s) => s.associateId === me.id).sort(byIsoDesc((s) => s.bookedAt));
     });
   }
 
   listTeam(): Promise<Sale[]> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.read((data) => {
-      const teamIds = new Set(teamUsers(data, currentAssociate(data).teamName).map((u) => u.id));
+      const teamIds = new Set(teamUsers(data, currentAssociate(data, phone).teamId).map((u) => u.id));
       return data.sales
         .filter((s) => teamIds.has(s.associateId))
         .sort(byIsoDesc((s) => s.bookedAt));
@@ -38,6 +40,7 @@ export class MockSalesRepository implements SalesRepository {
       );
     }
     const { plotId, customerName, customerPhone } = parsed.data;
+    const phone = this.ctx.currentPhone();
 
     return this.ctx.write((data, now) => {
       const plot = data.plots.find((p) => p.id === plotId);
@@ -56,7 +59,7 @@ export class MockSalesRepository implements SalesRepository {
         ),
         plotId: plot.id,
         projectId: plot.projectId,
-        associateId: currentAssociate(data).id,
+        associateId: currentAssociate(data, phone).id,
         customerName,
         ...(customerPhone ? { customerPhone } : {}),
         areaSqYd: plot.areaSqYd,
@@ -70,17 +73,19 @@ export class MockSalesRepository implements SalesRepository {
   }
 
   getTargets(): Promise<SalesTarget[]> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.read((data) => {
-      const { teamName } = currentAssociate(data);
+      const { teamId } = currentAssociate(data, phone);
       return data.salesTargets
-        .filter((t) => t.teamName === teamName)
+        .filter((t) => t.teamId === teamId)
         .sort((a, b) => b.period.localeCompare(a.period));
     });
   }
 
   getIncentive(): Promise<PendingIncentive> {
+    const phone = this.ctx.currentPhone();
     return this.ctx.read((data) => {
-      const me = currentAssociate(data);
+      const me = currentAssociate(data, phone);
       const record = data.associateIncentives.find((i) => i.associateId === me.id);
       return record ? { state: 'READY', value: record } : { state: 'PENDING' };
     });

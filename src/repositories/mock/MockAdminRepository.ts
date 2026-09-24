@@ -5,12 +5,16 @@ import {
   type AssociateIncentive,
   type User,
 } from '@/domain';
-import { SENIOR_ASSOCIATE_DESIGNATION } from '@/constants/prototype';
+import { ROLE_ID } from '@/seed/roles';
 
 import type { AdminRepository } from '../contracts';
 import { fail, type MockContext } from './MockContext';
 import { currentAdmin } from './effects';
 import { nextId } from './utils';
+
+/** "Associate" in the admin's list = anyone below Marketing Head — same set the old ASSOCIATE role named. */
+const isAssociateLevel = (u: User) =>
+  u.orgLevel === 'JUNIOR_ASSOCIATE' || u.orgLevel === 'SENIOR_ASSOCIATE';
 
 export class MockAdminRepository implements AdminRepository {
   constructor(private readonly ctx: MockContext) {}
@@ -21,24 +25,24 @@ export class MockAdminRepository implements AdminRepository {
 
   listAssociates(): Promise<User[]> {
     return this.ctx.read((data) =>
-      data.users
-        .filter((u) => u.role === 'ASSOCIATE')
-        .sort((a, b) => a.joinedAt.localeCompare(b.joinedAt)),
+      data.users.filter(isAssociateLevel).sort((a, b) => a.joinedAt.localeCompare(b.joinedAt)),
     );
   }
 
   promoteToSeniorAssociate(associateId: string): Promise<User> {
     return this.ctx.write((data) => {
-      const user = data.users.find((u) => u.id === associateId && u.role === 'ASSOCIATE');
+      const user = data.users.find((u) => u.id === associateId && isAssociateLevel(u));
       if (!user) fail('NOT_FOUND', `Associate ${associateId} not found`);
-      user.designation = SENIOR_ASSOCIATE_DESIGNATION;
+      user.orgLevel = 'SENIOR_ASSOCIATE';
+      user.roleId = ROLE_ID.seniorAssociate;
+      user.designation = 'Senior Associate';
       return user;
     });
   }
 
   getIncentiveFor(associateId: string): Promise<AssociateIncentive | null> {
     return this.ctx.read((data) => {
-      if (!data.users.some((u) => u.id === associateId && u.role === 'ASSOCIATE'))
+      if (!data.users.some((u) => u.id === associateId && isAssociateLevel(u)))
         fail('NOT_FOUND', `Associate ${associateId} not found`);
       return data.associateIncentives.find((i) => i.associateId === associateId) ?? null;
     });
@@ -54,9 +58,9 @@ export class MockAdminRepository implements AdminRepository {
     const { associateId, commissionRate, rewardPlotTarget } = parsed.data;
 
     return this.ctx.write((data, now) => {
-      const associate = data.users.find((u) => u.id === associateId && u.role === 'ASSOCIATE');
+      const associate = data.users.find((u) => u.id === associateId && isAssociateLevel(u));
       if (!associate) fail('NOT_FOUND', `Associate ${associateId} not found`);
-      if (associate.designation !== SENIOR_ASSOCIATE_DESIGNATION)
+      if (associate.orgLevel !== 'SENIOR_ASSOCIATE')
         fail('INVALID_INPUT', 'Only a Senior Associate can have an incentive assigned');
 
       const admin = currentAdmin(data);

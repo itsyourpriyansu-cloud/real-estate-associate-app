@@ -28,7 +28,7 @@ export type Sale = z.infer<typeof saleSchema>;
 /** A monthly target for one team ("Team performance, targets"). */
 export const salesTargetSchema = z.object({
   id: idSchema,
-  teamName: z.string().min(1),
+  teamId: idSchema,
   /** Calendar month, `YYYY-MM`. */
   period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Period must be YYYY-MM'),
   targetAreaSqYd: z.number().positive(),

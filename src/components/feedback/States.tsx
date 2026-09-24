@@ -102,6 +102,13 @@ export function describeRepositoryError(error: unknown, subject: string) {
       message: 'It may have been removed.',
     };
   }
+  if (isRepositoryError(error) && error.code === 'FORBIDDEN') {
+    return {
+      offline: false,
+      title: 'Not authorized',
+      message: `You don’t have permission to view ${subject}.`,
+    };
+  }
   return {
     offline: false,
     title: `Couldn’t load ${subject}`,

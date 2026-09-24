@@ -1,161 +1,220 @@
-import type { User } from '@/domain';
+import type { OrganizationLevel, User, UserStatus } from '@/domain';
 
-import { ASSOCIATE_ID, ASSOCIATE_NAME, TEAM_LEAD_ID, memberId } from './ids';
+import {
+  ASSOCIATE_ID,
+  ASSOCIATE_NAME,
+  CEO_ID,
+  MANAGEMENT_ID,
+  MARKETING_HEAD_YHIPL1_ID,
+  MARKETING_HEAD_YHIPL3_ID,
+  TEAM_LEAD_ID,
+  memberId,
+} from './ids';
+import { ROLE_ID } from './roles';
+import { TEAM_ID } from './teams';
 import type { SeedTime } from './time';
 
-export const TEAM_NAME = 'YHIPL2';
+const ROLE_BY_LEVEL: Record<OrganizationLevel, string> = {
+  CEO: ROLE_ID.ceo,
+  MANAGEMENT: ROLE_ID.management,
+  MARKETING_HEAD: ROLE_ID.marketingHead,
+  SENIOR_ASSOCIATE: ROLE_ID.seniorAssociate,
+  JUNIOR_ASSOCIATE: ROLE_ID.juniorAssociate,
+};
+
+const DESIGNATION_BY_LEVEL: Record<OrganizationLevel, string> = {
+  CEO: 'CEO',
+  MANAGEMENT: 'Management',
+  MARKETING_HEAD: 'Marketing Head',
+  SENIOR_ASSOCIATE: 'Senior Associate',
+  JUNIOR_ASSOCIATE: 'Junior Associate',
+};
 
 interface MemberBlueprint {
   n: number;
   fullName: string;
-  /**
-   * Same team: 0 = the demo associate, -1 = the team lead, otherwise another member's `n`.
-   * Other team: 0 = no sponsor (the team's root), otherwise another member's `n`.
-   */
-  sponsor: number;
-  designation: string;
+  orgLevel: 'SENIOR_ASSOCIATE' | 'JUNIOR_ASSOCIATE';
+  /** Resolved manager id — must satisfy `ALLOWED_MANAGER_LEVELS` (effects.ts). */
+  reportingManagerId: string;
   joinedDaysAgo: number;
-  team: string;
+  teamId: string;
+  codePrefix: string;
   active?: false;
 }
 
-const SPONSOR_ME = 0;
-const SPONSOR_LEAD = -1;
-
 /**
- * The downline under the demo associate (members 1–9: four direct, four at level 2, one at
- * level 3), five more members of the same team under the team lead (10–14), and two members of a
- * different team (15–16). All names, numbers and addresses are synthetic.
+ * The downline under the demo associate (members 1–9), five more members of the same team under
+ * the Marketing Head (10–14), two members of team YHIPL1 (15–16), and two members of the new team
+ * YHIPL3 (17–18). Every `reportingManagerId` satisfies the strict CEO → Management → Marketing
+ * Head → Senior Associate → Junior Associate chain (`ALLOWED_MANAGER_LEVELS`). All names, numbers
+ * and addresses are synthetic.
  */
 const MEMBERS: readonly MemberBlueprint[] = [
   {
     n: 1,
     fullName: 'Vikram Naidu',
-    sponsor: SPONSOR_ME,
-    designation: 'Senior Associate',
+    orgLevel: 'SENIOR_ASSOCIATE',
+    reportingManagerId: TEAM_LEAD_ID,
     joinedDaysAgo: 320,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 2,
     fullName: 'Deepa Krishnan',
-    sponsor: SPONSOR_ME,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: ASSOCIATE_ID,
     joinedDaysAgo: 290,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 3,
     fullName: 'Sanjay Mehta',
-    sponsor: SPONSOR_ME,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: ASSOCIATE_ID,
     joinedDaysAgo: 210,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 4,
     fullName: 'Lakshmi Prasad',
-    sponsor: SPONSOR_ME,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: ASSOCIATE_ID,
     joinedDaysAgo: 150,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 5,
     fullName: 'Rohit Chandra',
-    sponsor: 1,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(1),
     joinedDaysAgo: 240,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 6,
     fullName: 'Fatima Sheikh',
-    sponsor: 1,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(1),
     joinedDaysAgo: 120,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 7,
     fullName: 'Kiran Babu',
-    sponsor: 2,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    // Was under member 2 (a Junior Associate) — moved to a Senior Associate to satisfy the
+    // strict hierarchy (a Junior Associate may not manage another Junior Associate).
+    reportingManagerId: memberId(1),
     joinedDaysAgo: 95,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 8,
     fullName: 'Harsha Vardhan',
-    sponsor: 5,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(1),
     joinedDaysAgo: 60,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 9,
     fullName: 'Pallavi Joshi',
-    sponsor: 4,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: ASSOCIATE_ID,
     joinedDaysAgo: 45,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
     active: false,
   },
   {
     n: 10,
     fullName: 'Naveen Kumar',
-    sponsor: SPONSOR_LEAD,
-    designation: 'Senior Associate',
+    orgLevel: 'SENIOR_ASSOCIATE',
+    reportingManagerId: TEAM_LEAD_ID,
     joinedDaysAgo: 340,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 11,
     fullName: 'Swetha Pillai',
-    sponsor: SPONSOR_LEAD,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: TEAM_LEAD_ID,
     joinedDaysAgo: 260,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 12,
     fullName: 'Imran Qureshi',
-    sponsor: 10,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(10),
     joinedDaysAgo: 180,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 13,
     fullName: 'Divya Narayan',
-    sponsor: 10,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(10),
     joinedDaysAgo: 100,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 14,
     fullName: 'Prakash Rao',
-    sponsor: 11,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    // Was under member 11 (a Junior Associate) — moved for the same reason as member 7.
+    reportingManagerId: memberId(10),
     joinedDaysAgo: 70,
-    team: TEAM_NAME,
+    teamId: TEAM_ID.yhipl2,
+    codePrefix: 'YH-APL2',
   },
   {
     n: 15,
     fullName: 'Gopal Verma',
-    sponsor: 0,
-    designation: 'Senior Associate',
+    orgLevel: 'SENIOR_ASSOCIATE',
+    reportingManagerId: MARKETING_HEAD_YHIPL1_ID,
     joinedDaysAgo: 380,
-    team: 'YHIPL1',
+    teamId: TEAM_ID.yhipl1,
+    codePrefix: 'YH-APL1',
   },
   {
     n: 16,
     fullName: 'Rekha Bansal',
-    sponsor: 15,
-    designation: 'Associate',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: memberId(15),
     joinedDaysAgo: 200,
-    team: 'YHIPL1',
+    teamId: TEAM_ID.yhipl1,
+    codePrefix: 'YH-APL1',
+  },
+  {
+    n: 17,
+    fullName: 'Ibrahim Sheikh',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: MARKETING_HEAD_YHIPL3_ID,
+    joinedDaysAgo: 150,
+    teamId: TEAM_ID.yhipl3,
+    codePrefix: 'YH-APL3',
+  },
+  {
+    n: 18,
+    fullName: 'Nandini Rao',
+    orgLevel: 'JUNIOR_ASSOCIATE',
+    reportingManagerId: MARKETING_HEAD_YHIPL3_ID,
+    joinedDaysAgo: 90,
+    teamId: TEAM_ID.yhipl3,
+    codePrefix: 'YH-APL3',
   },
 ];
 
@@ -183,69 +242,136 @@ export const SELLING_USER_IDS: readonly string[] = [
   memberId(13),
 ];
 
-function memberUser(t: SeedTime, bp: MemberBlueprint): User {
-  const isOtherTeam = bp.team !== TEAM_NAME;
-  const sponsorId = isOtherTeam
-    ? bp.sponsor === 0
-      ? undefined
-      : memberId(bp.sponsor)
-    : bp.sponsor === SPONSOR_ME
-      ? ASSOCIATE_ID
-      : bp.sponsor === SPONSOR_LEAD
-        ? TEAM_LEAD_ID
-        : memberId(bp.sponsor);
-  const slug = bp.fullName.toLowerCase().replace(/[^a-z]+/g, '.');
+function statusOf(active: false | undefined): UserStatus {
+  return active === false ? 'INACTIVE' : 'ACTIVE';
+}
+
+function withHierarchyFields(params: {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  associateCode: string;
+  orgLevel: OrganizationLevel;
+  teamId?: string;
+  reportingManagerId?: string;
+  joinedAt: string;
+  active?: false;
+  reraRegistration?: string;
+}): User {
+  const status = statusOf(params.active);
   return {
-    id: memberId(bp.n),
-    role: 'ASSOCIATE',
-    fullName: bp.fullName,
-    phone: `+9198765${String(bp.n * 7 + 10).padStart(5, '0')}`,
-    email: `${slug}@example.com`,
-    associateCode: `${bp.team === TEAM_NAME ? 'YH-APL2' : 'YH-APL1'}-${String(1050 + bp.n).padStart(4, '0')}`,
-    designation: bp.designation,
-    teamName: bp.team,
-    ...(sponsorId ? { sponsorId } : {}),
-    joinedAt: t.at(-bp.joinedDaysAgo, '10:00'),
-    status: bp.active === false ? 'INACTIVE' : 'ACTIVE',
+    id: params.id,
+    fullName: params.fullName,
+    phone: params.phone,
+    email: params.email,
+    associateCode: params.associateCode,
+    roleId: ROLE_BY_LEVEL[params.orgLevel],
+    orgLevel: params.orgLevel,
+    designation: DESIGNATION_BY_LEVEL[params.orgLevel],
+    ...(params.teamId ? { teamId: params.teamId } : {}),
+    ...(params.reportingManagerId ? { reportingManagerId: params.reportingManagerId } : {}),
+    joinedAt: params.joinedAt,
+    status,
+    statusHistory: [
+      {
+        status,
+        changedAt: params.joinedAt,
+        changedByUserId: params.reportingManagerId ?? params.id,
+      },
+    ],
+    ...(params.reraRegistration ? { reraRegistration: params.reraRegistration } : {}),
   };
 }
 
+function memberUser(t: SeedTime, bp: MemberBlueprint): User {
+  const slug = bp.fullName.toLowerCase().replace(/[^a-z]+/g, '.');
+  return withHierarchyFields({
+    id: memberId(bp.n),
+    fullName: bp.fullName,
+    phone: `+9198765${String(bp.n * 7 + 10).padStart(5, '0')}`,
+    email: `${slug}@example.com`,
+    associateCode: `${bp.codePrefix}-${String(1050 + bp.n).padStart(4, '0')}`,
+    orgLevel: bp.orgLevel,
+    teamId: bp.teamId,
+    reportingManagerId: bp.reportingManagerId,
+    joinedAt: t.at(-bp.joinedDaysAgo, '10:00'),
+    active: bp.active,
+  });
+}
+
 /**
- * The prototype login (+91 9876543210) resolves to the associate. All phone numbers and emails in
- * the seed are synthetic (example.com addresses, sequential numbers) — no real customer data.
- * `PROTOTYPE_ACCOUNTS` (constants) lists the same numbers and a test keeps the two in step.
- *
- * Order matters: the mock's `currentAssociate` is the first ASSOCIATE, so the demo associate stays first.
+ * The prototype login (+91 9876543210) resolves to the demo associate; the same phone directory
+ * (`PROTOTYPE_ACCOUNTS`) plus the CEO's number resolve every seeded org level, so signing in as
+ * each one shows a distinct dashboard. All phone numbers and emails are synthetic.
  */
 export function buildUsers(t: SeedTime): User[] {
   return [
-    {
-      id: ASSOCIATE_ID,
-      role: 'ASSOCIATE',
-      fullName: ASSOCIATE_NAME,
-      phone: '+919876543210',
-      email: 'raghunath.reddy@example.com',
-      associateCode: 'YH-APL2-1048',
-      designation: 'Senior Associate',
-      teamName: TEAM_NAME,
-      sponsorId: TEAM_LEAD_ID,
-      joinedAt: t.at(-540, '10:00'),
-      status: 'ACTIVE',
-      reraRegistration: 'DEMO-RERA-ASSOC-1048',
-    },
-    {
+    withHierarchyFields({
+      id: CEO_ID,
+      fullName: 'Priya Narasimhan',
+      phone: '+919000000001',
+      email: 'priya.narasimhan@example.com',
+      associateCode: 'YH-EXEC-0001',
+      orgLevel: 'CEO',
+      joinedAt: t.at(-1200, '09:00'),
+    }),
+    withHierarchyFields({
+      id: MANAGEMENT_ID,
+      fullName: 'Arvind Subramanian',
+      phone: '+919000000002',
+      email: 'arvind.subramanian@example.com',
+      associateCode: 'YH-EXEC-0002',
+      orgLevel: 'MANAGEMENT',
+      reportingManagerId: CEO_ID,
+      joinedAt: t.at(-1100, '09:00'),
+    }),
+    withHierarchyFields({
       id: TEAM_LEAD_ID,
-      role: 'TEAM_LEAD',
       fullName: 'Meenakshi Sundaram',
       phone: '+919876500001',
       email: 'meenakshi.sundaram@example.com',
       associateCode: 'YH-APL2-0007',
-      designation: 'Team Lead',
-      teamName: TEAM_NAME,
+      orgLevel: 'MARKETING_HEAD',
+      teamId: TEAM_ID.yhipl2,
+      reportingManagerId: MANAGEMENT_ID,
       joinedAt: t.at(-900, '10:00'),
-      status: 'ACTIVE',
       reraRegistration: 'DEMO-RERA-ASSOC-0007',
-    },
+    }),
+    withHierarchyFields({
+      id: MARKETING_HEAD_YHIPL1_ID,
+      fullName: 'Ananya Iyer',
+      phone: '+919000000003',
+      email: 'ananya.iyer@example.com',
+      associateCode: 'YH-APL1-0001',
+      orgLevel: 'MARKETING_HEAD',
+      teamId: TEAM_ID.yhipl1,
+      reportingManagerId: MANAGEMENT_ID,
+      joinedAt: t.at(-850, '10:00'),
+    }),
+    withHierarchyFields({
+      id: MARKETING_HEAD_YHIPL3_ID,
+      fullName: 'Suresh Pillai',
+      phone: '+919000000004',
+      email: 'suresh.pillai@example.com',
+      associateCode: 'YH-APL3-0001',
+      orgLevel: 'MARKETING_HEAD',
+      teamId: TEAM_ID.yhipl3,
+      reportingManagerId: MANAGEMENT_ID,
+      joinedAt: t.at(-400, '10:00'),
+    }),
+    withHierarchyFields({
+      id: ASSOCIATE_ID,
+      fullName: ASSOCIATE_NAME,
+      phone: '+919876543210',
+      email: 'raghunath.reddy@example.com',
+      associateCode: 'YH-APL2-1048',
+      orgLevel: 'SENIOR_ASSOCIATE',
+      teamId: TEAM_ID.yhipl2,
+      reportingManagerId: TEAM_LEAD_ID,
+      joinedAt: t.at(-540, '10:00'),
+      reraRegistration: 'DEMO-RERA-ASSOC-1048',
+    }),
     ...MEMBERS.map((bp) => memberUser(t, bp)),
   ];
 }

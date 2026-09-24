@@ -76,7 +76,7 @@ Swapping in a backend means writing `ApiLeadRepository`, `ApiProjectRepository`,
 
 The app is always in prototype mode. Prototype controls (scenario, demo clock, latency, reset) are held in `prototypeStore`:
 
-- **Scenarios:** Normal · Busy day · Empty CRM · Offline · Repository errors
+- **Scenarios:** Normal · Busy day · Empty CRM · Offline · Repository errorsw
 - **Clock:** _Demo clock_ (default) freezes "now" at **Mon 21 Sep 2026, 09:15** so today's tasks and visits are always meaningful, even if the app is opened weeks later. _Real clock_ re-anchors all seed data to the actual current day.
 - **Latency:** optional 250–700 ms delay on every repository call.
 
